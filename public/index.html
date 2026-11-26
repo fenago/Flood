@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Flood Watch South Florida</title>
+  <meta name="description" content="Flood outlook and beach-day score for South Florida cities.">
+  <meta name="theme-color" content="#0b1d2a">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">
+  <link rel="stylesheet" href="/src/ui/tokens.css">
+  <link rel="stylesheet" href="/src/ui/app.css">
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <a class="visually-hidden" href="#view">Skip to content</a>
+  <header class="topbar glass">
+    <h1 id="title">Flood Watch</h1>
+    <span class="status" id="topstatus" aria-live="off"></span>
+    <a class="link-btn" href="#/cities" id="change-city">Change City</a>
+  </header>
+  <main>
+    <div id="update-slot"></div>
+    <div id="view" tabindex="-1"><p role="status">Loading Flood Watch…</p></div>
+    <div id="live" class="visually-hidden" aria-live="polite"></div>
+    <div id="toast" class="visually-hidden" role="status"></div>
+    <footer class="notice">
+      <p id="notice">Flood Watch is not an official warning service. Follow the National Weather Service and local emergency officials.</p>
+      <p id="credit"><a href="https://open-meteo.com/">Weather data by Open-Meteo.com</a> · Tides: NOAA CO-OPS · Alerts: <a href="https://www.weather.gov/">National Weather Service</a></p>
+      <noscript><p>Flood Watch needs JavaScript. For official alerts, go to weather.gov.</p></noscript>
+    </footer>
+  </main>
+  <nav class="tabbar glass" aria-label="Main">
+    <a href="#/outlook" data-tab="outlook">Outlook</a>
+    <a href="#/beach" data-tab="beach">Beach</a>
+    <a href="#/cities" data-tab="cities">Cities</a>
+    <a href="#/settings" data-tab="settings">Settings</a>
+  </nav>
+</body>
+</html>

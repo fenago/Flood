@@ -17,7 +17,7 @@ export const S = {
   ERR_BODY: 'Check your connection, then try again. For official alerts, go to weather.gov.',
   ERR_BTN: 'Try Again',
   STALE_BANNER: (age) => `Offline. This forecast is from ${age} ago. Check NWS for current alerts.`,
-  OLD_BANNER: (age) => `This forecast is from ${age} ago. Pull to refresh or tap Try Again.`,
+  OLD_BANNER: (age) => `Showing a saved forecast from ${age} ago. Check NWS for current alerts.`,
   ALERT_UNKNOWN: 'Alert status unknown — check weather.gov.',
   ALERT_UNKNOWN_DETAIL: "We couldn't reach the National Weather Service.",
   ALERT_LAST_KNOWN: (age) => `Last known alerts, from ${age} ago:`,
