@@ -12,8 +12,7 @@
     "test": "node --test --test-reporter=spec \"tests/unit/**/*.test.mjs\" \"tests/functions/**/*.test.mjs\" \"tests/security/**/*.test.mjs\"",
     "test:e2e": "npm run build && playwright test --trace off",
     "serve": "node scripts/serve.mjs dist 4173",
-    "smoke": "node scripts/smoke-local.mjs",
-    "hash-password": "node scripts/hash-password.mjs"
+    "smoke": "node scripts/smoke-local.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.14.0",

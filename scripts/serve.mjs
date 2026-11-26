@@ -18,6 +18,8 @@ if (withFunctions) api = await (await import('./dev-functions.mjs')).createDevAp
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${port}`);
+  // LOCAL ONLY (--functions): mock Supabase token for the smoke test. This server never runs on Netlify.
+  if (api && url.pathname === '/__dev/token') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(api.devToken()); }
   if (api && url.pathname.startsWith('/api/')) return api.handle(req, res, port);
   let p = decodeURIComponent(url.pathname);
   if (p.endsWith('/')) p += 'index.html';

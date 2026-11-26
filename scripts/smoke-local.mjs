@@ -1,6 +1,6 @@
 // Local smoke test (smoke-test-rollback skill, adapted to this container): serves dist/ plus the real
 // /api handlers with MOCKED deps, then walks the checks. Part 1: console unconfigured (the v1 deploy
-// state) must fail closed. Part 2: with local test config, login -> chat -> proposal -> approve works
+// state) must fail closed. Part 2: with local test config, Supabase token -> chat -> proposal -> approve works
 // against in-memory Blobs, a scripted Claude and an in-memory GitHub. No network, no real keys.
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -26,7 +26,7 @@ await withServer(4180, { FW_SMOKE_UNCONFIGURED: "1" }, async (base) => {
   const sw = await fetch(base + "/sw.js");
   check("GET /sw.js 200 with stamped version", sw.status === 200 && /const VERSION = "[0-9a-f]{12}"/.test(await sw.text()));
   check("GET /config/scoring.json + /data/cities.json 200", (await fetch(base + "/config/scoring.json")).status === 200 && (await fetch(base + "/data/cities.json")).status === 200);
-  for (const [path, init] of [["/api/agents", {}], ["/api/session", {}], ["/api/auth-login", { method: "POST", headers: { origin: base, "content-type": "application/json" }, body: '{"password":"x"}' }]]) {
+  for (const [path, init] of [["/api/agents", {}], ["/api/session", {}]]) {
     const r = await fetch(base + path, init);
     const b = await r.json();
     check(`unconfigured ${init.method ?? "GET"} ${path} -> 503 console not configured`, r.status === 503 && b.error.message === "console not configured");
@@ -36,14 +36,14 @@ await withServer(4180, { FW_SMOKE_UNCONFIGURED: "1" }, async (base) => {
 // Part 2: local test configuration (mocked Claude/GitHub/Blobs).
 await withServer(4181, {}, async (base) => {
   const r401 = await fetch(base + "/api/agents");
-  check("GET /api/agents 401 without session", r401.status === 401);
-  const { DEV_PASSWORD } = await import("./dev-functions.mjs");
-  const login = await fetch(base + "/api/auth-login", { method: "POST", headers: { origin: base, "content-type": "application/json" }, body: JSON.stringify({ password: DEV_PASSWORD }) });
-  const { csrfToken } = await login.json();
-  const cookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
-  check("login 200 sets __Host-fw_session", login.status === 200 && cookie.startsWith("__Host-fw_session="));
-  const h = { origin: base, cookie, "x-csrf-token": csrfToken, "content-type": "application/json" };
-  const agents = await (await fetch(base + "/api/agents", { headers: { cookie } })).json();
+  check("GET /api/agents 401 without token", r401.status === 401);
+  const token = await (await fetch(base + "/__dev/token")).text();
+  const auth = { authorization: `Bearer ${token}` };
+  const s = await fetch(base + "/api/session", { headers: auth });
+  const sb = await s.json();
+  check("GET /api/session with admin token -> isAdmin", s.status === 200 && sb.isAdmin === true);
+  const h = { origin: base, ...auth, "content-type": "application/json" };
+  const agents = await (await fetch(base + "/api/agents", { headers: auth })).json();
   check("GET /api/agents with session lists 12 agents", agents.agents?.length === 12);
   let conv = null, proposalId = null, input = { type: "message", text: "Please add a line to the decisions log." };
   for (let turn = 0; turn < 4; turn++) {
@@ -56,7 +56,7 @@ await withServer(4181, {}, async (base) => {
     input = { type: "continue" };
   }
   check("chat streamed turns and produced a pending proposal", Boolean(proposalId), proposalId ?? "none");
-  const view = await (await fetch(`${base}/api/proposals?id=${proposalId}`, { headers: { cookie } })).json();
+  const view = await (await fetch(`${base}/api/proposals?id=${proposalId}`, { headers: auth })).json();
   check("proposal view has before/after for the diff", view.proposal?.files?.[0]?.before?.includes("Old line.") && view.proposal.files[0].after.includes("New line"));
   const ap = await fetch(base + "/api/proposal-approve", { method: "POST", headers: h, body: JSON.stringify({ id: proposalId }) });
   const apb = await ap.json();

@@ -147,7 +147,7 @@ curl -s https://SITE/api/agents      # now 401 (auth on) instead of 503
 | Feature | Free | Personal | Pro |
 |---|---|---|---|
 | Static site, Functions, Blobs, Background Functions | yes | yes | yes |
-| Code-based rate-limit rules per project (we use 2: `auth-login`, `agent-chat`) | 2 | 2 | 5 |
+| Code-based rate-limit rules per project (we use 2: `session`, `agent-chat`) | 2 | 2 | 5 |
 | "Contains secret values" + secret scanning controls | — | yes | yes |
 | Per-variable **Functions-only** scope | — | — | yes |
 
@@ -157,6 +157,6 @@ v1 (public app) runs fully on Free. Supabase Auth is on the Supabase side (see i
 
 - NWS requests from real browsers without a custom `User-Agent` (step 3.2).
 - Netlify Blobs returning an ETag on every read in production (our conditional writes refuse to write without one; the local Blobs server does not return one).
-- Netlify `rateLimit` rules actually enforcing on `auth-login` and `agent-chat`.
+- Netlify `rateLimit` rules actually enforcing on `session` and `agent-chat`.
 - The `__Host-` session cookie and streaming `/api/agent-chat` on the Netlify runtime; real Claude and GitHub calls (only mocks were used).
 - iPhone Safari install, safe areas, VoiceOver; Android TalkBack (WebKit was not available here; the iPhone e2e project ran Chromium with an iPhone viewport).

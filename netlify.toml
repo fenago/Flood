@@ -48,4 +48,4 @@
     Content-Type = "application/manifest+json"
 
 # No [[redirects]]: each function declares its own /api/* path in `config`.
-# Rate limits live in function code: Netlify rules on auth-login and agent-chat only (2 rules fit the Free plan).
+# Rate limits live in function code: Netlify rules on session and agent-chat only (2 rules fit the Free plan).
