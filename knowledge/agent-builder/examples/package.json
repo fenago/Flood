@@ -1,0 +1,12 @@
+{
+  "name": "agent-builder-examples",
+  "private": true,
+  "type": "module",
+  "description": "Worked examples only. Not part of the site build.",
+  "dependencies": {
+    "js-yaml": "5.5.0"
+  },
+  "scripts": {
+    "validate": "node validate-agents.mjs ../../.. && node validate-agents.mjs model-files claude"
+  }
+}

@@ -1,0 +1,70 @@
+
+## console-approve-deploy.md
+APV-BTN            grade   7.4  words  7  PASS
+APV-REJECT         grade   8.4  words  1  short (not graded)
+APV-WARN-NET       grade  -0.3  words 13  PASS
+APV-WARN-SCRIPT    grade   2.4  words 13  PASS
+CONF-TITLE         grade   9.2  words  3  short (not graded)
+CONF-BODY          grade   5.0  words 18  PASS
+CONF-FILES         grade   0.7  words  4  short (not graded)
+CONF-CHECK         grade  -0.7  words  8  PASS
+CONF-PASS          grade   4.0  words  7  PASS
+CONF-CANCEL        grade   8.4  words  1  short (not graded)
+CONF-DEPLOY        grade   8.4  words  1  short (not graded)
+PROG-COMMIT        grade   9.2  words  3  short (not graded)
+DONE-COMMIT        grade   6.0  words  7  PASS
+DONE-LINK          grade   3.7  words  4  short (not graded)
+PROG-DEPLOY        grade   5.1  words  8  PASS
+DONE-LIVE          grade  -2.4  words  7  PASS
+ERR-STALE          grade   2.3  words 15  PASS
+ERR-STALE-BTN      grade   3.7  words  4  short (not graded)
+ERR-COMMIT         grade   2.3  words 15  PASS
+ERR-RATE           grade   3.2  words  9  PASS
+ERR-SESSION        grade   2.2  words 10  PASS
+ERR-PASS           grade   1.3  words  6  PASS
+ERR-DUP            grade   5.8  words  9  PASS
+
+## flow-pick-city-outlook.md
+PICK-TITLE         grade   1.3  words  3  short (not graded)
+PICK-HELP          grade  -0.7  words 16  PASS
+PICK-LOC           grade   5.2  words  3  short (not graded)
+PICK-LOC-HELP      grade   2.4  words 13  PASS
+PICK-LOC-DENIED    grade   2.4  words 13  PASS
+PICK-EMPTY-SEARCH  grade   6.0  words 16  PASS
+LOAD-1             grade   6.4  words  6  PASS
+LOAD-UPDATING      grade  20.2  words  1  short (not graded)
+PARTIAL-TIDES      grade   2.3  words 14  PASS
+ERR-TITLE          grade   3.7  words  4  short (not graded)
+ERR-BODY           grade   6.4  words 12  PASS
+ERR-BTN            grade   2.9  words  2  short (not graded)
+STALE-BANNER       grade   2.7  words 12  PASS
+ALERT-UNKNOWN      grade   6.4  words 10  PASS
+UPDATED            grade  10.0  words  5  short (not graded)
+NWS-HEAD           grade   0.7  words  4  short (not graded)
+NWS-SUB            grade   6.7  words  8  PASS
+NWS-LINK           grade   0.7  words  4  short (not graded)
+LOW-LEAD           grade   2.3  words 15  PASS
+ELEV-LEAD          grade   4.5  words 16  PASS
+ELEV-HINT          grade   1.6  words 11  PASS
+HIGH-LEAD          grade   3.1  words 21  PASS
+HIGH-HINT          grade   4.5  words 12  PASS
+SEV-LEAD           grade   5.7  words 14  PASS
+SEV-HINT           grade   6.9  words 13  PASS
+UNCERTAIN          grade   5.0  words  9  PASS
+NOTICE             grade   9.9  words 17  EXCEPTION - Required notice; agency name and "officials" are fixed wording.
+CREDIT             grade  15.5  words  4  short (not graded)
+BEACH-VETO         grade   4.8  words 11  PASS
+BEACH-GOOD         grade  -1.6  words 11  PASS
+
+## ios-install-sheet.md
+INST-TITLE         grade  -1.1  words  7  PASS
+INST-WHY           grade   1.5  words 14  PASS
+INST-STEP1         grade   3.0  words 18  PASS
+INST-STEP2         grade  -0.7  words  8  PASS
+INST-STEP3         grade   1.0  words  9  PASS
+INST-MISSING       grade   1.7  words 18  PASS
+INST-NOTNOW        grade  -3.0  words  2  short (not graded)
+INST-SETTINGS      grade   2.3  words  8  PASS
+INST-SETTINGS-ROW  grade  -2.2  words  4  short (not graded)
+
+43 lines graded, 0 failing. Overall grade across graded lines: 3.1

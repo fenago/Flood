@@ -1,0 +1,12 @@
+{
+  "name": "agent-console-engineer-examples",
+  "private": true,
+  "type": "module",
+  "description": "Worked examples only. Not part of the site build.",
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.14.0"
+  },
+  "scripts": {
+    "test": "node 01-stream-sse/test.mjs && node 02-propose-change-tool/test.mjs && node 03-github-atomic-commit/test.mjs"
+  }
+}

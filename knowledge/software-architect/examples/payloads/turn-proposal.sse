@@ -1,0 +1,23 @@
+: keep-alive comment lines like this one are allowed and ignored
+
+event: start
+data: {"conversationId":"c_01JDQ4ZK7M8N9P0QRSTVWXYZ12","turn":2,"turnId":"9e2f1a33-0c4b-4d5e-9f60-7a8b9c0d1e2f","agent":"flood-risk-scientist","model":"claude-opus-5-5"}
+
+event: text
+data: {"delta":"The 24 h rain threshold for Elevated is 1.5 in; "}
+
+event: text
+data: {"delta":"I propose 1.25 in for king-tide days, citing NWS Miami guidance."}
+
+event: tool
+data: {"callId":"toolu_02","name":"propose_change","status":"started","summary":"1 file"}
+
+event: proposal
+data: {"proposalId":"p_01JDQ50000000000000000000A","summary":"Lower Elevated rain threshold on king-tide days","files":[{"path":"public/config/scoring.json","bytes":2190,"change":"modify"}]}
+
+event: tool
+data: {"callId":"toolu_02","name":"propose_change","status":"ok","summary":"Stored as pending proposal"}
+
+event: done
+data: {"stopReason":"end_turn","next":"none","usage":{"inputTokens":6200,"outputTokens":540}}
+

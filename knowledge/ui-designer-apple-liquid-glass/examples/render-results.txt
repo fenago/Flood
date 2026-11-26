@@ -1,0 +1,10 @@
+PASS  axe light  violations: [] passes: 21 needs-review: [color-contrast]
+PASS  targets >= 44px light  []
+PASS  focus not obscured light
+PASS  axe dark  violations: [] passes: 21 needs-review: [color-contrast]
+PASS  targets >= 44px dark  []
+PASS  focus not obscured dark
+PASS  reflow at 320px (no horizontal scroll)  scrollWidth 320, clientWidth 320
+PASS  reduced transparency -> solid tab bar  {"bg":"rgb(255, 255, 255)","bf":"blur(0px) saturate(1)"}
+
+8 checks, 0 failing.

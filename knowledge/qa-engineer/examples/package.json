@@ -1,0 +1,13 @@
+{
+  "name": "flood-watch-qa-examples",
+  "private": true,
+  "description": "Example Playwright suite for Flood Watch (documentation only; install deps outside the repo root).",
+  "scripts": {
+    "test": "playwright test --trace off",
+    "test:ci": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.1",
+    "@playwright/test": "1.63.0"
+  }
+}

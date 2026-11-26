@@ -1,0 +1,45 @@
+mode   pair                                                       fg       bg       ratio   min  result
+light  --color-text on --color-bg                                 #0b1d2a  #eef3f7  15.37   4.5  PASS - body text on page
+light  --color-text on --color-surface                            #0b1d2a  #ffffff  17.17   4.5  PASS - body text on card
+light  --color-text on --color-surface-2                          #0b1d2a  #e2eaf1  14.12   4.5  PASS - text on grouped row
+light  --color-text-muted on --color-bg                           #44566a  #eef3f7  6.75    4.5  PASS - secondary text on page
+light  --color-text-muted on --color-surface                      #44566a  #ffffff  7.54    4.5  PASS - secondary text on card
+light  --color-text-muted on --color-surface-2                    #44566a  #e2eaf1  6.20    4.5  PASS - secondary text on row
+light  --color-accent on --color-bg                               #0a5cad  #eef3f7  5.97    4.5  PASS - link text on page
+light  --color-accent on --color-surface                          #0a5cad  #ffffff  6.67    4.5  PASS - link text on card
+light  --color-on-accent on --color-accent                        #ffffff  #0a5cad  6.67    4.5  PASS - primary button label
+light  --color-alert-text on --color-alert-bg                     #7a0d1c  #fde8e8  9.40    4.5  PASS - NWS alert banner text
+light  --risk-low-on on --risk-low                                #ffffff  #17804a  4.97    4.5  PASS - Low badge
+light  --risk-elevated-on on --risk-elevated                      #1d1600  #f5c443  11.02   4.5  PASS - Elevated badge
+light  --risk-high-on on --risk-high                              #ffffff  #c2410c  5.18    4.5  PASS - High badge
+light  --risk-severe-on on --risk-severe                          #ffffff  #7f1530  10.23   4.5  PASS - Severe badge
+light  --color-focus on --color-bg                                #0a5cad  #eef3f7  5.97    3    PASS - focus ring on page
+light  --color-focus on --color-surface                           #0a5cad  #ffffff  6.67    3    PASS - focus ring on card
+light  --color-alert-edge on --color-alert-bg                     #b3192f  #fde8e8  5.78    3    PASS - alert banner edge
+light  --color-alert-edge on --color-bg                           #b3192f  #eef3f7  6.07    3    PASS - alert banner edge vs page
+light  --color-text on glass(86%) over #000000                    #0b1d2a  #dbdbdb  12.40   4.5  PASS - tab/toolbar label (worst backdrop)
+light  --color-text-muted on glass(86%) over #000000              #44566a  #dbdbdb  5.45    4.5  PASS - unselected tab label (worst backdrop)
+light  --color-accent on glass(86%) over #000000                  #0a5cad  #dbdbdb  4.82    4.5  PASS - selected tab label (worst backdrop)
+dark   --color-text on --color-bg                                 #e8f0f6  #0b1d2a  14.90   4.5  PASS - body text on page
+dark   --color-text on --color-surface                            #e8f0f6  #132a3a  12.84   4.5  PASS - body text on card
+dark   --color-text on --color-surface-2                          #e8f0f6  #1c3649  10.89   4.5  PASS - text on grouped row
+dark   --color-text-muted on --color-bg                           #a9bccb  #0b1d2a  8.78    4.5  PASS - secondary text on page
+dark   --color-text-muted on --color-surface                      #a9bccb  #132a3a  7.57    4.5  PASS - secondary text on card
+dark   --color-text-muted on --color-surface-2                    #a9bccb  #1c3649  6.42    4.5  PASS - secondary text on row
+dark   --color-accent on --color-bg                               #7cbcff  #0b1d2a  8.58    4.5  PASS - link text on page
+dark   --color-accent on --color-surface                          #7cbcff  #132a3a  7.39    4.5  PASS - link text on card
+dark   --color-on-accent on --color-accent                        #0b1d2a  #7cbcff  8.58    4.5  PASS - primary button label
+dark   --color-alert-text on --color-alert-bg                     #ffd5dc  #3a0d16  12.65   4.5  PASS - NWS alert banner text
+dark   --risk-low-on on --risk-low                                #04210f  #3cc98a  8.06    4.5  PASS - Low badge
+dark   --risk-elevated-on on --risk-elevated                      #241a00  #ffd75e  12.38   4.5  PASS - Elevated badge
+dark   --risk-high-on on --risk-high                              #2a1000  #ff9a5c  8.55    4.5  PASS - High badge
+dark   --risk-severe-on on --risk-severe                          #ffffff  #b8283f  6.15    4.5  PASS - Severe badge
+dark   --color-focus on --color-bg                                #7cbcff  #0b1d2a  8.58    3    PASS - focus ring on page
+dark   --color-focus on --color-surface                           #7cbcff  #132a3a  7.39    3    PASS - focus ring on card
+dark   --color-alert-edge on --color-alert-bg                     #ff6b81  #3a0d16  6.14    3    PASS - alert banner edge
+dark   --color-alert-edge on --color-bg                           #ff6b81  #0b1d2a  6.27    3    PASS - alert banner edge vs page
+dark   --color-text on glass(88%) over #ffffff                    #e8f0f6  #2f4452  8.81    4.5  PASS - tab/toolbar label (worst backdrop)
+dark   --color-text-muted on glass(88%) over #ffffff              #a9bccb  #2f4452  5.19    4.5  PASS - unselected tab label (worst backdrop)
+dark   --color-accent on glass(88%) over #ffffff                  #7cbcff  #2f4452  5.07    4.5  PASS - selected tab label (worst backdrop)
+
+42 pairs checked, 0 failing.

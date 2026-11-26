@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1d2a">
+  <title>Flood Watch test fixture</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <style>
+    body { margin: 0; padding: 16px; font: 16px/1.5 system-ui, sans-serif; background: #0b1d2a; color: #f2f6f9; }
+    label, select { display: block; } select { min-height: 44px; font: inherit; }
+    .small { font-size: .875rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Flood Watch</h1>
+    <label for="city">City</label>
+    <select id="city">
+      <option value="25.7617,-80.1918">Miami</option>
+      <option value="26.1224,-80.1373">Fort Lauderdale</option>
+    </select>
+    <h2>Next 24 hours</h2>
+    <p id="rain" aria-live="polite"></p>
+    <p id="status" role="status"></p>
+    <p id="error" role="alert"></p>
+    <p class="small">Not an official warning service. Check the National Weather Service for alerts.</p>
+    <p class="small">Weather data by Open-Meteo.com</p>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

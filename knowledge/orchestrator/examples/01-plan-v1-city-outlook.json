@@ -1,0 +1,179 @@
+{
+  "goal": "Ship v1 city outlook: a user picks a South Florida city and sees the flood prognosis (Low/Elevated/High/Severe) with reasons and the beach-day score (0-100), installable and usable offline with stale-data labels.",
+  "release": true,
+  "acceptance": [
+    "City picker lists the starter cities from public/data/cities.json and remembers the last choice",
+    "Outlook shows flood level with reasons and beach score with label, from live Open-Meteo + NOAA + NWS data called by the browser",
+    "Active NWS flood/coastal alert overrides the computed level and is shown first",
+    "Not-an-official-warning notice and 'Weather data by Open-Meteo.com' credit are visible",
+    "Works offline with last cached data and its age shown",
+    "Unit, fixture, e2e and accessibility checks pass on the deploy preview"
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Define v1 outlook module contracts",
+      "owner": "software-architect",
+      "wave": 1,
+      "dependsOn": [],
+      "touches": ["docs/03-architecture.md", "docs/decisions.md", "docs/contracts/outlook.md"],
+      "brief": {
+        "goal": "Write the contracts between src/api, src/scoring and src/ui for the outlook: function names, input/output JSON shapes (normalised weather, tides, alerts, FloodResult, BeachResult), error/missing-data rules, cache keys.",
+        "read": ["CLAUDE.md", "docs/01-use-case-and-scoring.md", "docs/03-architecture.md"],
+        "owns": ["docs/contracts/outlook.md", "docs/decisions.md (new entries only)"],
+        "acceptance": ["Two experts can build a client and a scorer from the spec without talking", "No server, database or secret introduced"],
+        "return": "Result/Checks/Handoff/Risks report; contract file path"
+      }
+    },
+    {
+      "id": "T2",
+      "title": "Design city picker and outlook flow and wording",
+      "owner": "ux-designer-apple-hig",
+      "wave": 1,
+      "dependsOn": [],
+      "touches": ["docs/design/outlook-flow.md"],
+      "brief": {
+        "goal": "Screens and states for picker, outlook (loading, fresh, stale, offline, alert-override, error), all user-facing text, accessibility notes.",
+        "read": ["CLAUDE.md", "docs/01-use-case-and-scoring.md", "docs/05-testing-and-accessibility.md"],
+        "owns": ["docs/design/outlook-flow.md"],
+        "acceptance": ["Every state has wording", "Notice and credit placement defined", "WCAG 2.2 AA notes per screen"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T3",
+      "title": "Risk-level and surface design tokens",
+      "owner": "ui-designer-apple-liquid-glass",
+      "wave": 1,
+      "dependsOn": [],
+      "touches": ["src/ui/tokens.css"],
+      "brief": {
+        "goal": "CSS custom properties for the four flood levels, beach score bands, glass surfaces with solid fallbacks, light and dark.",
+        "read": ["CLAUDE.md", "docs/05-testing-and-accessibility.md"],
+        "owns": ["src/ui/tokens.css"],
+        "acceptance": ["Text contrast >= 4.5:1 in both themes", "Level never conveyed by colour alone (token for icon/label pairing)"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T4",
+      "title": "Browser clients for Open-Meteo, NOAA tides, NWS alerts",
+      "owner": "api-integration-open-meteo",
+      "wave": 2,
+      "dependsOn": ["T1"],
+      "touches": ["src/api/open-meteo.js", "src/api/noaa-tides.js", "src/api/nws-alerts.js", "src/api/cache.js", "tests/fixtures/api/"],
+      "brief": {
+        "goal": "Implement the src/api functions exactly as in docs/contracts/outlook.md, with recorded fixtures.",
+        "read": ["CLAUDE.md", "docs/01-use-case-and-scoring.md", "docs/contracts/outlook.md"],
+        "owns": ["src/api/**", "tests/fixtures/api/**", "tests/api/**"],
+        "acceptance": ["Output validates against the contract shapes", "null treated as missing", "Cached response carries fetchedAt"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T5",
+      "title": "Flood and beach scoring as pure functions",
+      "owner": "flood-risk-scientist",
+      "wave": 2,
+      "dependsOn": ["T1"],
+      "touches": ["src/scoring/flood.js", "src/scoring/beach.js", "public/config/scoring.json", "tests/scoring/"],
+      "brief": {
+        "goal": "Implement scoreFlood and scoreBeach per the contract, thresholds in public/config/scoring.json with cited sources.",
+        "read": ["CLAUDE.md", "docs/01-use-case-and-scoring.md", "docs/contracts/outlook.md"],
+        "owns": ["src/scoring/**", "public/config/scoring.json", "tests/scoring/**"],
+        "acceptance": ["NWS alert override implemented", "Fixture table tests for each level boundary", "Every threshold cites a source"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T6",
+      "title": "App shell, outlook UI, manifest and service worker",
+      "owner": "pwa-mobile-engineer",
+      "wave": 2,
+      "dependsOn": ["T1", "T2", "T3"],
+      "touches": ["public/index.html", "src/ui/outlook.js", "src/ui/picker.js", "public/manifest.webmanifest", "public/sw.js"],
+      "brief": {
+        "goal": "Build the screens from docs/design/outlook-flow.md using src/ui/tokens.css; render from contract-shaped fake data until T4/T5 land.",
+        "read": ["CLAUDE.md", "docs/02-pwa-installability.md", "docs/design/outlook-flow.md", "docs/contracts/outlook.md"],
+        "owns": ["public/index.html", "src/ui/** (except tokens.css)", "public/manifest.webmanifest", "public/sw.js"],
+        "acceptance": ["Installable on Android; Add to Home Screen works on iPhone", "Offline shell loads", "No inline scripts"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T7",
+      "title": "Headers and CSP for the outlook data hosts",
+      "owner": "netlify-engineer",
+      "wave": 2,
+      "dependsOn": ["T1"],
+      "touches": ["netlify.toml"],
+      "brief": {
+        "goal": "Set CSP connect-src to exactly the hosts in the contract, sw.js no-cache, security headers.",
+        "read": ["CLAUDE.md", "docs/03-architecture.md", "docs/contracts/outlook.md"],
+        "owns": ["netlify.toml"],
+        "acceptance": ["No 'unsafe-inline'", "Only listed hosts in connect-src", "Deploy preview builds"],
+        "return": "Result/Checks/Handoff/Risks report, including the deploy preview URL"
+      }
+    },
+    {
+      "id": "T8",
+      "title": "Wire clients and scorers into the UI",
+      "owner": "pwa-mobile-engineer",
+      "wave": 3,
+      "dependsOn": ["T4", "T5", "T6"],
+      "touches": ["src/main.js", "src/ui/outlook.js"],
+      "brief": {
+        "goal": "Replace fake data with src/api + src/scoring; show data age; alert override first.",
+        "read": ["docs/contracts/outlook.md", "T4/T5/T6 reports (pasted)"],
+        "owns": ["src/main.js", "src/ui/outlook.js"],
+        "acceptance": ["All outlook acceptance criteria met on a local build"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T9",
+      "title": "Security review of netlify.toml headers and CSP",
+      "owner": "security-engineer",
+      "wave": 3,
+      "dependsOn": ["T7"],
+      "touches": [],
+      "brief": {
+        "goal": "Review T7 diff: CSP, headers, no secrets, nothing outside fixed decisions.",
+        "read": ["CLAUDE.md", "docs/04-agent-console.md section 4", "T7 diff (pasted)"],
+        "owns": [],
+        "acceptance": ["Explicit APPROVE or REQUEST CHANGES with reasons"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T10",
+      "title": "Test the release candidate on the deploy preview",
+      "owner": "qa-engineer",
+      "wave": 4,
+      "dependsOn": ["T8", "T9"],
+      "touches": ["tests/e2e/outlook.spec.js"],
+      "brief": {
+        "goal": "Run unit, fixture, e2e (phone viewports, offline) and axe on the deploy preview; record evidence.",
+        "read": ["docs/05-testing-and-accessibility.md", "T8 and T9 reports (pasted)"],
+        "owns": ["tests/e2e/**"],
+        "acceptance": ["Evidence names preview URL and commit SHA", "Every release-signoff test line answered"],
+        "return": "Result/Checks/Handoff/Risks report"
+      }
+    },
+    {
+      "id": "T11",
+      "title": "Release sign-off",
+      "owner": "orchestrator",
+      "wave": 5,
+      "dependsOn": ["T10"],
+      "touches": [],
+      "brief": {
+        "goal": "Apply release-signoff checklist; GO or NO-GO with owners.",
+        "read": ["All reports"],
+        "owns": [],
+        "acceptance": ["Every checklist line marked with evidence"],
+        "return": "Sign-off record for the owner"
+      }
+    }
+  ]
+}

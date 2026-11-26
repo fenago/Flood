@@ -1,0 +1,19 @@
+{
+  "accepted": "Nov 06 2020",
+  "epoch": "1983-2001",
+  "units": "feet",
+  "OrthometricDatum": "NAVD88",
+  "datums": [
+    {"name": "STND", "description": "Station Datum", "value": 0.0},
+    {"name": "MHHW", "description": "Mean Higher-High Water", "value": 12.38},
+    {"name": "MHW", "description": "Mean High Water", "value": 12.3},
+    {"name": "MSL", "description": "Mean Sea Level", "value": 11.26},
+    {"name": "MLLW", "description": "Mean Lower-Low Water", "value": 10.13},
+    {"name": "GT", "description": "Great Diurnal Range", "value": 2.24},
+    {"name": "NAVD88", "description": "North American Vertical Datum of 1988", "value": 12.15}
+  ],
+  "max": 15.945,
+  "maxdate": "20170910",
+  "maxtime": "17:00",
+  "self": "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8723214/datums.json"
+}

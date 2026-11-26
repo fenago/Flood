@@ -1,0 +1,14 @@
+{
+  "name": "flood-watch-pwa-example",
+  "private": true,
+  "type": "module",
+  "description": "Example manifest + service worker + install UI for Flood Watch. The app itself has no dependencies; verify.mjs needs the 'playwright' package (preinstalled globally in the agent container).",
+  "scripts": {
+    "icons": "node make-icons.mjs",
+    "serve": "node serve.mjs 4173",
+    "verify": "node verify.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

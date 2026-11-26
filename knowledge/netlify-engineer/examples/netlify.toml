@@ -1,0 +1,63 @@
+# Example netlify.toml for Flood Watch (reference copy - the real file lives at
+# the repo root and any change to it needs security-engineer review).
+# Checked by: node <repo>/knowledge/security-engineer/examples/check-headers.mjs <this file>
+
+[build]
+  # The build only generates static files; no secrets are needed at build time.
+  command = "node scripts/build-agents-manifest.mjs"
+  publish = "public"
+
+  # Build-only variables. Variables declared in netlify.toml are NOT available
+  # to Functions at runtime (Netlify "Environment variables and functions").
+  [build.environment]
+    NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"     # the default; stated for clarity
+  node_bundler = "esbuild"
+  # Agent prompts are read server-side by agent-chat / agent-job-background.
+  included_files = [".claude/agents/**"]
+
+# Scheduled cleanup (v2). Prefer `export const config = { schedule: "@daily" }`
+# in the function file; netlify.toml is the documented alternative:
+# [functions."cleanup-old-jobs"]
+#   schedule = "@daily"
+
+# Deploy Previews build exactly like production; only env var VALUES differ by
+# context (set in the UI/CLI, never here). Example of a context override:
+[context.deploy-preview]
+  command = "node scripts/build-agents-manifest.mjs"
+
+[dev]
+  publish = "public"
+  port = 8888
+
+# ---- Headers for static files (do NOT reach Function responses) ------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://api.open-meteo.com https://marine-api.open-meteo.com https://geocoding-api.open-meteo.com https://api.tidesandcurrents.noaa.gov https://api.weather.gov; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/console/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+# No [[redirects]] needed: functions declare their own /api/* paths via
+# `export const config = { path: "/api/..." }`. Rate limits also live in each
+# function's config - Netlify does not accept function rate limits here.

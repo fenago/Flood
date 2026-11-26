@@ -1,0 +1,15 @@
+event: start
+data: {"conversationId":"c_01JDQ4ZK7M8N9P0QRSTVWXYZ12","turn":1,"turnId":"5b0c7a52-9d1e-4c3f-8a2b-1f6e0d9c4a71","agent":"flood-risk-scientist","model":"claude-opus-5-5"}
+
+event: text
+data: {"delta":"Let me check the current thresholds first."}
+
+event: tool
+data: {"callId":"toolu_01","name":"read_file","status":"started","summary":"public/config/scoring.json"}
+
+event: tool
+data: {"callId":"toolu_01","name":"read_file","status":"ok","summary":"public/config/scoring.json (2.1 KB)"}
+
+event: done
+data: {"stopReason":"tool_use","next":"continue","usage":{"inputTokens":5120,"outputTokens":310,"cacheReadInputTokens":4096},"budget":{"usedToday":182000,"limitToday":2000000}}
+
