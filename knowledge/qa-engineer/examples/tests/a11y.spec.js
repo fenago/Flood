@@ -17,3 +17,15 @@ test('outlook screen has no WCAG 2.x A/AA violations', async ({ page }, testInfo
                                          contentType: 'application/json' });
   expect(results.violations).toEqual([]);
 });
+
+test('negative control: removing the city label is caught (select-name)', async ({ page, baseURL }) => {
+  await page.route(OPEN_METEO, (r) => r.fulfill({ json: FORECAST }));
+  await page.route(baseURL + '/', async (route) => {
+    const res = await route.fetch();
+    const html = (await res.text()).replace('<label for="city">City</label>', '');
+    return route.fulfill({ response: res, body: html });
+  });
+  await page.goto('/');
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(results.violations.map((v) => v.id)).toContain('select-name');
+});
