@@ -1,0 +1,50 @@
+# Flood Watch - Netlify configuration. Any change here needs security-engineer review.
+# Secrets are NEVER set here (variables declared in netlify.toml are build-only and not visible to Functions).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  [build.environment]
+    NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  # Shared code lives in netlify/lib/ (bundled through imports). Agent definitions are compiled at build
+  # time into netlify/lib/agents.generated.mjs, so no included_files are needed.
+
+[dev]
+  publish = "dist"
+  port = 8888
+
+# ---- Security headers for static files (they do NOT reach Function responses; see netlify/lib/http.mjs) ----
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://api.open-meteo.com https://marine-api.open-meteo.com https://geocoding-api.open-meteo.com https://api.tidesandcurrents.noaa.gov https://api.weather.gov; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Permissions-Policy = "camera=(), microphone=(), payment=(), usb=(), geolocation=(self)"
+
+# The console talks only to its own /api. A second CSP can only tighten the first.
+[[headers]]
+  for = "/console/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+# No [[redirects]]: each function declares its own /api/* path in `config`.
+# Rate limits live in function code: Netlify rules on auth-login and agent-chat only (2 rules fit the Free plan).

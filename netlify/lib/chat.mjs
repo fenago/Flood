@@ -91,3 +91,27 @@ export async function runTools({ calls, gh, ghCfg, record, context, emit }) {
   }
   return results;
 }
+
+const CONV_ID = /^c_[A-Za-z0-9_-]{16,64}$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const MAX_MESSAGES = 400;
+export const MAX_ROUNDS = 25;
+export const LOCK_MS = 70_000;
+
+export function validateChatBody(b) {
+  const keys = Object.keys(b);
+  if (keys.some((k) => !["agent", "conversationId", "turnId", "input"].includes(k))) return "unknown field";
+  if (typeof b.agent !== "string") return "agent";
+  if (!(b.conversationId === null || (typeof b.conversationId === "string" && CONV_ID.test(b.conversationId)))) return "conversationId";
+  if (typeof b.turnId !== "string" || !UUID.test(b.turnId)) return "turnId";
+  const i = b.input;
+  if (!i || typeof i !== "object") return "input";
+  if (i.type === "message") {
+    if (Object.keys(i).some((k) => !["type", "text"].includes(k))) return "input";
+    if (typeof i.text !== "string" || i.text.trim().length === 0 || i.text.length > 8000) return "input.text";
+  } else if (i.type === "continue") {
+    if (Object.keys(i).length !== 1 || b.conversationId === null) return "input";
+  } else return "input.type";
+  return null;
+}
+

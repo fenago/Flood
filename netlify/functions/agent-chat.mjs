@@ -1,14 +1,14 @@
 // POST /api/agent-chat - one streamed Claude turn (SSE). Session + Origin + CSRF required.
 // Spec: knowledge/software-architect/examples/02-agent-chat-interface-spec.md
 import { randomBytes } from "node:crypto";
-import { json, jsonError, env, readJsonBody, SSE_HEADERS } from "../lib/http.mjs";
+import { jsonError, env, readJsonBody, SSE_HEADERS } from "../lib/http.mjs";
 import { requireWrite } from "../lib/session.mjs";
 import { openStore, casUpdate, StorageError } from "../lib/blobs.mjs";
 import { getAgent } from "../lib/agents.mjs";
 import { mapModel, mapEffort } from "../lib/models.mjs";
 import { dailyBudget, tokensUsedToday, addTokens, secondsToMidnight } from "../lib/budget.mjs";
 import { githubConfig, makeGitHub, headSha } from "../lib/github.mjs";
-import { runClaudeTurn, runTools } from "../lib/chat.mjs";
+import { runClaudeTurn, runTools, validateChatBody, MAX_MESSAGES, MAX_ROUNDS, LOCK_MS } from "../lib/chat.mjs";
 import { sseStream } from "../lib/sse.mjs";
 import { deps } from "../lib/deps.mjs";
 
@@ -17,29 +17,6 @@ export const config = {
   method: "POST",
   rateLimit: { windowLimit: 20, windowSize: 60, aggregateBy: ["ip", "domain"] }, // Netlify rule 2 of 2
 };
-
-const CONV_ID = /^c_[A-Za-z0-9_-]{16,64}$/;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const MAX_MESSAGES = 400;
-const MAX_ROUNDS = 25;
-const LOCK_MS = 70_000;
-
-export function validateChatBody(b) {
-  const keys = Object.keys(b);
-  if (keys.some((k) => !["agent", "conversationId", "turnId", "input"].includes(k))) return "unknown field";
-  if (typeof b.agent !== "string") return "agent";
-  if (!(b.conversationId === null || (typeof b.conversationId === "string" && CONV_ID.test(b.conversationId)))) return "conversationId";
-  if (typeof b.turnId !== "string" || !UUID.test(b.turnId)) return "turnId";
-  const i = b.input;
-  if (!i || typeof i !== "object") return "input";
-  if (i.type === "message") {
-    if (Object.keys(i).some((k) => !["type", "text"].includes(k))) return "input";
-    if (typeof i.text !== "string" || i.text.trim().length === 0 || i.text.length > 8000) return "input.text";
-  } else if (i.type === "continue") {
-    if (Object.keys(i).length !== 1 || b.conversationId === null) return "input";
-  } else return "input.type";
-  return null;
-}
 
 export default async (req, context) => {
   if (req.method !== "POST") return jsonError(405, "method_not_allowed", "POST only", {}, { allow: "POST" });
@@ -141,4 +118,3 @@ export default async (req, context) => {
   }
 };
 
-export { json };

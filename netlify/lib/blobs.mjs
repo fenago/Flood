@@ -44,7 +44,8 @@ export async function casUpdate(store, key, fn) {
 
 /** Counter increment with retries. Returns the new count, or throws StorageError. */
 export async function incrementCounter(store, key, by = 1, field = "n") {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 10; i++) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 3 + Math.floor(Math.random() * 12 * i))); // jittered backoff on contention
     const cur = await store.getWithMetadata(key);
     if (!cur) {
       const r = await store.setJSON(key, { [field]: by, at: deps.now().toISOString() }, { onlyIfNew: true });

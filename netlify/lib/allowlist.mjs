@@ -68,7 +68,7 @@ export function validateProposal(proposal) {
 export const READ_ALLOW = [
   ...WRITE_ALLOW,
   /^(?:README|CLAUDE)\.md$/,
-  new RegExp(`^knowledge/${DIRS}${SEG}\\.(?:md|mjs|js|json)$`),
+  /^knowledge\/(?:[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*\/)*[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*\.(?:md|mjs|js|json)$/, // READMEs are uppercase
   /^\.claude\/agents\/[a-z0-9-]+\.md$/,
   /^\.claude\/skills\/[a-z0-9-]+\/SKILL\.md$/,
 ];
