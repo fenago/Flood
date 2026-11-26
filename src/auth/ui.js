@@ -72,10 +72,10 @@ function field({ id, label, type = 'text', autocomplete, hint, minlength }) {
   if (type === 'email') input.setAttribute('inputmode', 'email');
   const wrap = h('div', { class: 'field-row' }, h('label', { for: id, text: label }));
   if (type === 'password') {
-    const toggle = h('button', { type: 'button', class: 'link-btn pw-toggle', 'aria-pressed': 'false', 'aria-controls': id, 'aria-label': `Show ${label.toLowerCase()}`, onclick: () => {
+    const toggle = h('button', { type: 'button', class: 'link-btn pw-toggle', 'aria-controls': id, 'aria-label': `Show ${label.toLowerCase()}`, onclick: () => {
       const show = input.type === 'password';
       input.type = show ? 'text' : 'password';
-      toggle.setAttribute('aria-pressed', String(show));
+      toggle.setAttribute('aria-label', `${show ? 'Hide' : 'Show'} ${label.toLowerCase()}`); // name starts with the visible word
       toggle.textContent = show ? T.HIDE : T.SHOW;
     } }, T.SHOW);
     wrap.append(h('div', { class: 'pw-wrap' }, input, toggle));

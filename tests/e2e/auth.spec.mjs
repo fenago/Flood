@@ -148,14 +148,14 @@ test("forgot password sends a reset link request", async ({ page }) => {
   expect(log.some((l) => l.includes("/auth/v1/recover"))).toBe(true);
 });
 
-test("Continue with Google navigates to Supabase /auth/v1/authorize?provider=google", async ({ page }) => {
+test("Continue with Google navigates to Supabase /auth/v1/authorize?provider=google", async ({ page, baseURL }) => {
   const log = await mockSupabase(page);
   await openAccount(page);
   const nav = page.waitForRequest((r) => r.url().startsWith(`${SB}/auth/v1/authorize`));
   await page.getByRole("button", { name: "Continue with Google" }).click();
   const u = new URL((await nav).url());
   expect(u.searchParams.get("provider")).toBe("google");
-  expect(u.searchParams.get("redirect_to")).toBe(new URL(page.url()).origin + "/");
+  expect(u.searchParams.get("redirect_to")).toBe(new URL(baseURL).origin + "/");
   expect(u.searchParams.get("code_challenge_method")).toBe("s256"); // PKCE
   expect(log.some((l) => l.includes("/authorize"))).toBe(true);
 });
@@ -244,7 +244,7 @@ test("service worker never caches Supabase or /auth requests (Chromium)", async 
     for (const k of await caches.keys()) for (const r of await (await caches.open(k)).keys()) out.push(r.url);
     return out;
   });
-  expect(cached.filter((u) => u.includes("supabase.co") || u.includes("/auth/"))).toEqual([]);
+  expect(cached.filter((u) => u.includes("supabase.co") || new URL(u).pathname.startsWith("/auth"))).toEqual([]);
   expect(cached.some((u) => u.endsWith("/config/auth.json"))).toBe(true); // public config is part of the shell
   await context.close();
 });
