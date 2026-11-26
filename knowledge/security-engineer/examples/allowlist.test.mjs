@@ -39,6 +39,7 @@ export const CASES = [
   ["scripts/build-agents-manifest.mjs", "denied path"],
   ["public/sw.js", "denied path"],
   ["CLAUDE.md", "denied path"],
+  ["knowledge/security-engineer/docs/01-session-management-cookies.md", "denied path"],
   ["public/_headers", "denied path"],
   ["public/_redirects.json", "denied path"],
   // shape tricks

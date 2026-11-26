@@ -13,7 +13,7 @@ The owner also gets a password-protected **Agent Console**, where the agents bel
 2. The browser calls Open-Meteo, NOAA and NWS directly. Open-Meteo is free, needs no key, is non-commercial only, and requires the credit line "Weather data by Open-Meteo.com".
 3. Official National Weather Service alerts override our scores. The app is not an official warning service and always says so.
 4. Secrets (Claude key, GitHub token, password hash, session secret) live only in Netlify environment variables scoped to Functions. They never go in the browser, the repo or logs.
-5. Console agents can only *propose* changes. A human approves every commit. Proposals may only touch allow-listed paths, and `.claude/`, `netlify/`, `netlify.toml`, `.github/`, `scripts/` and `package*.json` are always denied.
+5. Console agents can only *propose* changes. A human approves every commit. Proposals may only touch allow-listed paths, and `.claude/`, `knowledge/`, `netlify/`, `netlify.toml`, `public/_headers`, `public/_redirects`, `.github/`, `scripts/` and `package*.json` are always denied.
 
 ## The team
 
@@ -58,7 +58,7 @@ The experts are project subagents in `.claude/agents/`. Their knowledge is in pr
   - `docs/05-testing-and-accessibility.md`
   - `docs/expert-roster.md`
 - `knowledge/<agent-name>/` is each agent's own reference library: `docs/` holds notes taken from the official documentation (each with its source link), and `examples/` holds small verified examples of good work. Every agent reads its folder before answering and prefers it over memory. Console agents cannot change `knowledge/`, because it is not on the allow-list.
-- Record design decisions in `docs/decisions.md`.
+- Record design decisions in `docs/decisions.md`. Agent models, names and personalities are listed in `docs/agent-brains.md`.
 - Agent and skill files follow the official Claude Code formats (https://code.claude.com/docs/en/sub-agents, https://code.claude.com/docs/en/skills). Change them through `agent-builder`. The extra `personality:` frontmatter field is for the Agent Console cards; Claude Code ignores it.
 
 ## Working rules

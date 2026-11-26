@@ -16,7 +16,7 @@ export const WRITE_ALLOW = [
 // Deny always wins. Case-sensitive on purpose; uppercase never matches ALLOW anyway.
 export const WRITE_DENY = [
   /^netlify(?:\/|\.toml$)/, /^\.claude\//, /^\.github\//, /^scripts\//,
-  /^package(?:-lock)?\.json$/, /(?:^|\/)\.env/, /^public\/sw\.js$/, /^CLAUDE\.md$/,
+  /^package(?:-lock)?\.json$/, /(?:^|\/)\.env/, /^public\/sw\.js$/, /^CLAUDE\.md$/, /^knowledge\//, // agent knowledge steers behaviour
   /^public\/_(?:headers|redirects)(?:$|\.)/, // Netlify config files in the publish dir
 ];
 

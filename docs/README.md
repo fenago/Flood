@@ -32,7 +32,7 @@ This folder is the shared context for the team of expert agents that will build 
 
 ## Items marked "(verify)"
 
-A few details could not be fully confirmed from the docs pages and should be checked in a short spike: NWS Surf Zone Forecast endpoint format, Lake Worth tide station ID, whether the 60 s limit applies unchanged to streamed responses, and current iOS install behaviour.
+Resolved since the first draft: streamed function responses keep the 60 s limit (Netlify Functions API docs); Claude Code ignores the extra `personality` frontmatter field (Claude Code subagent docs); current iOS install steps (Apple Support). Still open: the NWS Surf Zone Forecast endpoint format and the Lake Worth tide station ID. Owner decisions are tracked in [decisions.md](decisions.md).
 
 ## The agent team
 

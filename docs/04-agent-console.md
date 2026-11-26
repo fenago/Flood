@@ -136,8 +136,9 @@ Agent calls propose_change
 ### 4.2 Password gate
 
 - One owner password; store only a **hash** (`CONSOLE_PASSWORD_HASH`, scrypt via `node:crypto`) and compare with `timingSafeEqual`.
-- On success, set a cookie `HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800` whose value is an HMAC-signed session ID (`SESSION_SECRET`); store the session in Blobs so it can be revoked ("log out everywhere").
-- Approve requires a **CSRF token** (double-submit) and, ideally, password re-entry.
+- On success, set a cookie `__Host-fw_session=…; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800` whose value is an HMAC-signed session ID (`SESSION_SECRET`); store the session in Blobs so it can be revoked ("log out everywhere").
+- Approve requires a **CSRF token** and, ideally, password re-entry. Use the **signed double-submit token bound to the session** (token = random + HMAC(`SESSION_SECRET`, session ID + random)) plus `Origin`/`Sec-Fetch-Site` checks. OWASP calls the naive double-submit cookie pattern insecure. Cookie name `__Host-fw_session`. Reference implementation: `knowledge/security-engineer/examples/session-auth.mjs`.
+- Password hashing: OWASP's scrypt setting (N=2^17, r=8) needs about 128 MiB, above Node's default `maxmem`; set `maxmem` explicitly.
 - Netlify also offers site-level password protection on some plans; it is all-or-nothing for the site, so it does not fit a public app with a private console. Netlify's built-in rate limiting is available on all plans per its availability table.
 
 ### 4.3 Fine-grained GitHub token
@@ -154,23 +155,26 @@ Create at GitHub → Settings → Developer settings → Fine-grained tokens:
 The agent can only propose files matching the allow-list, and the approve function re-checks it. Example:
 
 ```js
+// Reference implementation (tested with 40+ attack cases):
+// knowledge/security-engineer/examples/allowlist.mjs
+const SEG = "[a-z0-9_-]+(?:\\.[a-z0-9_-]+)*";   // lowercase, dots only inside a name
+const DIRS = `(?:${SEG}/)*`;
 const WRITE_ALLOW = [
-  /^public\/[a-z0-9/_-]+\.(html|css|js|json|svg|webmanifest)$/,
-  /^src\/[a-z0-9/_-]+\.(js|mjs|css|json)$/,
-  /^tests\/[a-z0-9/_-]+\.(js|mjs|json)$/,
-  /^docs\/[a-z0-9/_-]+\.md$/,
+  new RegExp(`^public/${DIRS}${SEG}\\.(?:html|css|js|json|svg|webmanifest)$`),
+  new RegExp(`^src/${DIRS}${SEG}\\.(?:js|mjs|css|json)$`),
+  new RegExp(`^tests/${DIRS}${SEG}\\.(?:js|mjs|json)$`),      // allows tests/x.test.mjs
+  new RegExp(`^docs/${DIRS}${SEG}\\.md$`),
 ];
 const WRITE_DENY = [
-  /^netlify\//, /^netlify\.toml$/, /^\.claude\//, /^\.github\//,
-  /^package(-lock)?\.json$/, /^scripts\//, /(^|\/)\.env/, /^public\/sw\.js$/,
+  /^netlify(?:\/|\.toml$)/, /^\.claude\//, /^\.github\//, /^scripts\//, /^knowledge\//,
+  /^package(?:-lock)?\.json$/, /(?:^|\/)\.env/, /^public\/sw\.js$/, /^CLAUDE\.md$/,
+  /^public\/_(?:headers|redirects)(?:$|\.)/,
 ];
-function allowed(p) {
-  if (p !== p.normalize("NFC") || p.includes("..") || p.startsWith("/") || p.includes("\\")) return false;
-  return WRITE_ALLOW.some(r => r.test(p)) && !WRITE_DENY.some(r => r.test(p));
-}
+// Reject before matching: empty, >200 chars, not NFC, control chars, "..", "\\",
+// "//", leading "/", "%", hidden segments ("/." or leading "."). Deny wins over allow.
 ```
 
-Why these denials: if an agent could edit `netlify/functions/*`, `netlify.toml`, `package.json` (install scripts), the build scripts, `.claude/agents/*` (its own instructions) or the service worker, one approved change could remove every other safeguard. Changes to those files go through normal human commits. Also cap: ≤ 10 files and ≤ 200 KB per proposal, text only.
+Why these denials: if an agent could edit `netlify/functions/*`, `netlify.toml`, `public/_headers`/`_redirects`, `package.json` (install scripts), the build scripts, `.claude/agents/*` or `knowledge/*` (its own instructions and reference library) or the service worker, one approved change could remove every other safeguard. Changes to those files go through normal human commits. Also cap: ≤ 10 files and ≤ 200 KB per proposal, text only.
 
 ### 4.5 Prompt injection
 
@@ -188,12 +192,14 @@ Daily spend guard: after each response add `usage.input_tokens + usage.output_to
 
 ## 6. Endpoints summary
 
+Netlify allows only 2 code-based rate-limit rules per project on Free/Personal (5 on Pro), so only login and chat use Netlify rules; every other limit below is a per-IP counter in Netlify Blobs. Every function sets its own security headers, because `netlify.toml` headers do not apply to Function responses.
+
 | Path | Method | Auth | Rate limit (per IP) | Notes |
 |---|---|---|---|---|
-| `/api/auth-login` | POST | password | 5 / 60 s | sets session cookie |
+| `/api/auth-login` | POST | password | 5 / 60 s (Netlify rule) | sets session cookie |
 | `/api/auth-logout` | POST | session | — | revokes session |
 | `/api/agents` | GET | session | 30 / 60 s | from bundled manifest |
-| `/api/agent-chat` | POST | session | 20 / 60 s | one streamed turn |
+| `/api/agent-chat` | POST | session | 20 / 60 s (Netlify rule) | one streamed turn |
 | `/api/agent-job` | POST | session | 5 / 60 s | starts background job |
 | `/api/job-status` | GET | session | 60 / 60 s | polling |
 | `/api/proposals/:id` | GET | session | 30 / 60 s | diff data |

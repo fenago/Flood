@@ -61,12 +61,14 @@ Plain HTML + ES modules (or Vite) keeps it simple; a framework is optional. A ti
 |---|---|
 | Functions live in `netlify/functions/`; modern signature `export default async (req, context) => new Response(...)`, with `export const config = { path: "/api/..." }` for a clean URL. | All server endpoints are under `/api/*`. |
 | **Synchronous execution limit: 60 seconds**, not configurable. | A single Claude turn with tools usually fits; a multi-step agent job may not. |
-| Buffered request/response payload **6 MB**; **streamed response payload 20 MB**. | Stream chat replies (better UX and larger payloads). The 60 s limit still applies to the invocation **(verify for streamed responses)**. |
+| Buffered request/response payload **6 MB**; **streamed response payload 20 MB**. | Stream chat replies (better UX and larger payloads). Confirmed in Netlify's Functions API docs: streamed responses keep the **60 s** limit. |
 | **Background Functions**: up to **15 minutes**; client gets an empty **202** immediately; on error Netlify retries after 1 min, then again 2 min later. Enabled with `config.background` or the legacy `-background` filename suffix. Available on Free, Personal, Pro and Enterprise credit-based plans. | Long agent jobs run here; results go to Blobs; jobs must be **idempotent** because of retries. |
+| Background Functions accept at most **256 KB** per request. | Pass job IDs only; keep job state in Blobs. |
 | **Scheduled Functions** (cron) exist. | v2: periodic alert checks for push notifications. |
 | **Netlify Blobs**: `import { getStore } from "@netlify/blobs"`; `set`, `setJSON`, `get(key, { type: "json" })`, `delete`, `list({ prefix })`; metadata ≤ 2 KB; keys ≤ 600 bytes; objects ≤ 5 GB. Eventually consistent (≤ 60 s propagation) unless you pass `{ consistency: "strong" }`; conditional writes with `onlyIfMatch` / `onlyIfNew`. `getStore` is site-wide and persists across deploys; `getDeployStore` is per-deploy. | Use **site-wide stores with strong consistency** for sessions, jobs and proposals; use `onlyIfMatch` for status transitions (pending → approved) so a double-click cannot commit twice. |
-| Function **rate limiting** is declared in the function's `config.rateLimit` (`windowLimit`, `windowSize` ≤ 180 s, `aggregateBy: ["ip","domain"]`), returns 429 or rewrites. It cannot be set in `netlify.toml`. | Declarative per-IP limits on login, chat and approve. |
-| Environment variables can be set in the UI/CLI/API, scoped (e.g. Functions only), and flagged **"Contains secret values"**; function env values must fit AWS Lambda's environment size limits. | Keep secrets few and short (see env table below). |
+| Function **rate limiting** is declared in the function's `config.rateLimit` (`windowLimit`, `windowSize` ≤ 180 s, `aggregateBy: ["ip","domain"]`), returns 429 or rewrites. It cannot be set in `netlify.toml`. Only **2 rules per project on Free/Personal, 5 on Pro**, and blocking can take up to ~10 s to start. | Netlify rules on `auth-login` and `agent-chat` only; every other endpoint uses a per-IP counter in Blobs (see the `rate-limiting-cost-guards` skill). |
+| Environment variables can be set in the UI/CLI/API, scoped (e.g. Functions only), and flagged **"Contains secret values"**; function env values must fit AWS Lambda's environment size limits. Variables declared in `netlify.toml` are **not** visible to Functions; per-variable scopes are a **Pro-and-above** feature; secret values/scanning need **Personal or above**; any change needs a redeploy. | Keep secrets few and short; set them in the UI/CLI, never in `netlify.toml`. The Netlify plan is an open owner decision (see `docs/decisions.md`). |
+| `[[headers]]` in `netlify.toml` apply to static files, **not** to Function responses, and cannot set `Set-Cookie`. | Every function sets its own security headers through a shared helper. |
 
 ### Environment variables
 
@@ -106,6 +108,8 @@ Never prefix any of these with a bundler's public prefix (`VITE_`, `PUBLIC_`, `N
   [headers.values]
     Cache-Control = "no-cache"
 ```
+
+Note: the NWS `alerts` proxy function above conflicts with `CLAUDE.md` fixed decision 2 (browser calls NWS directly). This is an open owner decision; see `docs/decisions.md`.
 
 ## 6. Deploy flow
 

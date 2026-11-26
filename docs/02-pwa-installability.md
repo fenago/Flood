@@ -40,13 +40,15 @@ Also add `<meta name="theme-color">`, `<link rel="apple-touch-icon" href="/icons
 
 | | Android (Chrome) | iPhone / iPad |
 |---|---|---|
-| How users install | Install prompt / menu "Install app". We can show our own button via the `beforeinstallprompt` event and call `prompt()`. | **Share → Add to Home Screen.** No `beforeinstallprompt`. Since iOS 16.4 this works from Safari, Chrome, Edge, Firefox and Orion (MDN). |
+| How users install | Install prompt / menu "Install app". We can show our own button via the `beforeinstallprompt` event and call `prompt()`. | In current Safari: **Page Menu (…) → Share → Add to Home Screen → turn on "Open as Web App" → Add** (Apple Support; see `knowledge/ux-designer-apple-hig/docs/06-ios-home-screen-install.md`). No `beforeinstallprompt`. Since iOS 16.4 this works from Safari, Chrome, Edge, Firefox and Orion (MDN). |
 | Opens as app | Yes, with `display: standalone` | Yes, if the manifest sets `display` to `standalone`/`fullscreen` (WebKit). Recent Safari releases have relaxed install requirements further **(verify on current iOS)**. |
 | Web Push | Yes | Yes, **only for Home Screen web apps**, iOS 16.4+, after a user gesture asks permission (Apple/WebKit docs). |
 | Background Sync / Periodic Sync | Chromium only | Not supported |
 | Install UI in our app | Custom "Install" button | Show a one-time instructional sheet ("Tap Share, then Add to Home Screen") when `navigator.standalone` is false on iOS |
 
 Firefox on Android adds a browser-badged shortcut rather than a manifest-based install (MDN).
+
+Also: iPhone Safari does not support the `prefers-reduced-transparency` media query (MDN), so translucent UI must be readable without that fallback.
 
 ## 3. Service worker plan
 

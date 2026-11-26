@@ -13,6 +13,8 @@
 | Performance / a11y / best practices | Lighthouse CI (`--only-categories=performance,accessibility,best-practices,seo`) | Regression budgets on every deploy preview. |
 | Manual devices | Real iPhone (Safari, Add to Home Screen) and Android (Chrome install) | Things automation cannot see: iOS install flow, safe areas, push permission prompt, VoiceOver/TalkBack. |
 
+**Installability check pitfall:** with a default (incognito) Playwright context, CDP `Page.getInstallabilityErrors` can return no errors even without a manifest. Use `chromium.launchPersistentContext` with `channel: 'chromium'`, and include a negative control (a page without a manifest must report `no-manifest`). Also: Playwright route mocks keep answering after `setOffline(true)`, so offline tests must make the mock abort; service-worker tests run on Chromium only. See `knowledge/qa-engineer/` and `knowledge/pwa-mobile-engineer/`.
+
 **Lighthouse no longer has a PWA category.** It was removed in Lighthouse 12.0 (April 2024, Chrome 126 DevTools) after Chrome relaxed its installability criteria. Use DevTools → Application → Manifest → *Installability*, or `Page.getInstallabilityErrors` in CI, instead.
 
 ### Netlify-specific
