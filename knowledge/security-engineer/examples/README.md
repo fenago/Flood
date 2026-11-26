@@ -30,7 +30,7 @@ no case-only duplicates).
 
 **Verified** (2026-11-26):
 `cd /home/user/Flood && node --test knowledge/security-engineer/examples/allowlist.test.mjs`
--> `# tests 2 # pass 2 # fail 0` (41 path cases + 8 proposal-level cases).
+-> `# tests 2 # pass 2 # fail 0` (42 path cases + 8 proposal-level cases).
 Print the table: `node knowledge/security-engineer/examples/allowlist.test.mjs --print`.
 
 | Input | Result |
@@ -43,7 +43,7 @@ Print the table: `node knowledge/security-engineer/examples/allowlist.test.mjs -
 | `public//index.html` | empty segment |
 | `docs/a.md<NUL>.js`, `docs/a<LF>b.md` | control char |
 | `.env`, `public/.env.js`, `.claude/agents/orchestrator.md`, `.github/workflows/ci.yml` | hidden segment |
-| `netlify.toml`, `netlify/functions/lib/allowlist.mjs`, `package.json`, `package-lock.json`, `scripts/build-agents-manifest.mjs`, `public/sw.js`, `CLAUDE.md` | denied path |
+| `netlify.toml`, `netlify/functions/lib/allowlist.mjs`, `package.json`, `package-lock.json`, `scripts/build-agents-manifest.mjs`, `public/sw.js`, `CLAUDE.md`, `public/_headers`, `public/_redirects.json` | denied path |
 | `Public/index.html`, `src/x.JS`, `public/index.html ` (trailing space), `publіc/index.html` (Cyrillic i), `public/evil.php`, `public/`, `README.md` | not on allow-list |
 | `docs/cafe` + U+0301 (NFD) | not NFC |
 | empty string | empty |
@@ -51,6 +51,8 @@ Print the table: `node knowledge/security-engineer/examples/allowlist.test.mjs -
 Findings against the repo (for orchestrator / agent-console-engineer):
 - The sample regexes in `docs/04-agent-console.md` section 4.4 reject `tests/scoring/flood.test.mjs`
   (no dot allowed in names) - checked: `false`. This example allows dots *inside* a segment only.
+- `public/_headers` / `public/_redirects` (Netlify config read from the publish dir) are blocked by the
+  skill's rules only because they have no allowed extension; this example denies them explicitly.
 - The sample `allowed()` in docs/04 lacks the skill's `//`, `%`, control-char and hidden-segment
   checks; its character class also accepts `public//index.html` (checked: `true`). Use the skill's
   full list, as here.

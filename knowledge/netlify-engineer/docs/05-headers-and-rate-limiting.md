@@ -24,9 +24,10 @@ Two ways:
 
 Path matching: `*` wildcard anywhere in a segment; `:placeholder` only at the start of a segment;
 not both in one segment. Precedence between `_headers` and `netlify.toml`: (unconfirmed) - not on the
-page; use **only `netlify.toml`** to avoid ambiguity (and because `public/` is agent-editable while
-`netlify.toml` is denied - a `public/_headers` file would let an approved proposal change headers;
-add `public/_headers` to the allow-list deny patterns).
+page; use **only `netlify.toml`** to avoid ambiguity. `public/` is agent-editable while `netlify.toml`
+is denied: `public/_headers` and `public/_redirects` are rejected today only because they have no
+allowed extension (checked with the example validator). Add them to the deny patterns explicitly so a
+future allow-list change cannot open them.
 
 **Custom headers apply only to files Netlify serves from its store. They do not apply to Function,
 Edge Function or proxied responses.** -> every function sets its own security headers.

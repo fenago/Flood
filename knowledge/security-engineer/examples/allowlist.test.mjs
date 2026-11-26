@@ -39,6 +39,8 @@ export const CASES = [
   ["scripts/build-agents-manifest.mjs", "denied path"],
   ["public/sw.js", "denied path"],
   ["CLAUDE.md", "denied path"],
+  ["public/_headers", "denied path"],
+  ["public/_redirects.json", "denied path"],
   // shape tricks
   ["Public/index.html", "not on allow-list"],
   ["src/x.JS", "not on allow-list"],

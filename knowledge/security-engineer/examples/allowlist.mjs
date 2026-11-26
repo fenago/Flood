@@ -17,6 +17,7 @@ export const WRITE_ALLOW = [
 export const WRITE_DENY = [
   /^netlify(?:\/|\.toml$)/, /^\.claude\//, /^\.github\//, /^scripts\//,
   /^package(?:-lock)?\.json$/, /(?:^|\/)\.env/, /^public\/sw\.js$/, /^CLAUDE\.md$/,
+  /^public\/_(?:headers|redirects)(?:$|\.)/, // Netlify config files in the publish dir
 ];
 
 export const LIMITS = { maxFiles: 10, maxTotalBytes: 200 * 1024 };
