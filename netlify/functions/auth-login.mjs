@@ -1,5 +1,6 @@
 // POST /api/auth-login {password} -> __Host-fw_session cookie + CSRF token.
 // Netlify rule (1 of 2) + REQUIRED Blobs lockout (10 failures / 15 min per IP) covering the ~10 s rule delay.
+import { requireConfigured } from "../lib/configured.mjs";
 import { json, jsonError, env, readJsonBody } from "../lib/http.mjs";
 import { verifyPassword, newSessionId, sessionKey, signSessionId, sessionCookie, newCsrfToken, originOk, sessionSecret, ipHash, SESSION_MAX_AGE } from "../lib/session.mjs";
 import { openStore, incrementCounter, StorageError } from "../lib/blobs.mjs";
@@ -15,6 +16,8 @@ const LOCK_WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 10;
 
 export default async (req, context) => {
+  const off = requireConfigured(); // fail closed before any Blobs, Claude or GitHub access
+  if (off) return off;
   if (req.method !== "POST") return jsonError(405, "method_not_allowed", "POST only", {}, { allow: "POST" });
   if (!originOk(req)) return jsonError(403, "csrf_failed", "Request blocked");
   const secret = sessionSecret();

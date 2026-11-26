@@ -1,4 +1,5 @@
 // POST /api/proposal-reject {id, note?} - pending -> rejected (conditional write). Session + CSRF required.
+import { requireConfigured } from "../lib/configured.mjs";
 import { json, jsonError, readJsonBody } from "../lib/http.mjs";
 import { requireWrite } from "../lib/session.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
@@ -9,6 +10,8 @@ import { PROPOSAL_ID } from "../lib/ids.mjs";
 export const config = { path: "/api/proposal-reject", method: "POST" };
 
 export default async (req, context) => {
+  const off = requireConfigured(); // fail closed before any Blobs, Claude or GitHub access
+  if (off) return off;
   const limited = await rateLimit("proposal-reject", context);
   if (limited) return limited;
   const auth = await requireWrite(req, context);

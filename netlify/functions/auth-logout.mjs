@@ -1,4 +1,5 @@
 // POST /api/auth-logout - deletes the session record and clears the cookie. Session + CSRF required.
+import { requireConfigured } from "../lib/configured.mjs";
 import { json } from "../lib/http.mjs";
 import { requireWrite, sessionKey, clearSessionCookie } from "../lib/session.mjs";
 import { openStore } from "../lib/blobs.mjs";
@@ -7,6 +8,8 @@ import { rateLimit } from "../lib/ratelimit.mjs";
 export const config = { path: "/api/auth-logout", method: "POST" };
 
 export default async (req, context) => {
+  const off = requireConfigured(); // fail closed before any Blobs, Claude or GitHub access
+  if (off) return off;
   const limited = await rateLimit("auth-logout", context);
   if (limited) return limited;
   const auth = await requireWrite(req, context);

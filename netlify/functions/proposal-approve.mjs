@@ -1,6 +1,7 @@
 // POST /api/proposal-approve {id, password?} - human approval -> one atomic GitHub commit -> Netlify redeploy.
 // Re-validates session, Origin, CSRF, recent auth, allow-list and limits; pending -> approving with onlyIfMatch
 // so a double click or a replay can never commit twice.
+import { requireConfigured } from "../lib/configured.mjs";
 import { json, jsonError, env, readJsonBody } from "../lib/http.mjs";
 import { requireWrite, verifyPassword, REAUTH_WINDOW_MS } from "../lib/session.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
@@ -13,6 +14,8 @@ import { PROPOSAL_ID } from "../lib/ids.mjs";
 export const config = { path: "/api/proposal-approve", method: "POST" };
 
 export default async (req, context) => {
+  const off = requireConfigured(); // fail closed before any Blobs, Claude or GitHub access
+  if (off) return off;
   const limited = await rateLimit("proposal-approve", context);
   if (limited) return limited;
   const auth = await requireWrite(req, context);

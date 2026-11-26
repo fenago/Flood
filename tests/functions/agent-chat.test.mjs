@@ -145,10 +145,10 @@ test("truncated tool call at max_tokens is never executed", async () => {
   assert.equal(ev.at(-1).data.stopReason, "max_tokens");
 });
 
-test("missing ANTHROPIC_API_KEY -> 503 not_configured (no key in responses)", async () => {
-  await setup({ envOverrides: { ANTHROPIC_API_KEY: undefined } });
-  const s = await login(loginFn);
-  const r = await send(s, msg("hi"));
+test("missing ANTHROPIC_API_KEY -> the whole console fails closed (503), even login", async () => {
+  const env = await setup({ envOverrides: { ANTHROPIC_API_KEY: undefined } });
+  const r = await call(loginFn, "/api/auth-login", { method: "POST", body: { password: "correct horse battery staple" } });
   assert.equal(r.status, 503);
-  assert.doesNotMatch(JSON.stringify(r.body), /test-dummy/);
+  assert.equal(r.body.error.message, "console not configured");
+  assert.equal(env.claude.calls.length, 0);
 });

@@ -24,6 +24,9 @@ export async function createDevApi() {
   process.env.GITHUB_REPO = `${gh.owner}/${gh.repo}`;
   process.env.GITHUB_BRANCH = "main";
   process.env.CONTEXT = "dev";
+  if (process.env.FW_SMOKE_UNCONFIGURED) { // simulate a fresh Netlify deploy with no console variables
+    for (const k of ["SESSION_SECRET", "CONSOLE_PASSWORD_HASH", "ANTHROPIC_API_KEY", "GITHUB_TOKEN"]) delete process.env[k];
+  }
   setDeps({ getStore: memoryBlobs().getStore, anthropic: () => claude.client, fetch: gh.fetch, githubApiBase: "https://api.github.test" });
 
   const routes = {};

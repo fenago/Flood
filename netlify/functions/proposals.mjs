@@ -1,5 +1,6 @@
 // GET /api/proposals            -> recent proposals (id, summary, status, agent, createdAt)
 // GET /api/proposals?id=p_...   -> one proposal with "before" contents (at baseSha) for the diff view
+import { requireConfigured } from "../lib/configured.mjs";
 import { json, jsonError } from "../lib/http.mjs";
 import { requireSession } from "../lib/session.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
@@ -15,6 +16,8 @@ const view = (p) => ({ id: p.id, summary: p.summary, status: p.status, agent: p.
   expired: p.status === "pending" && Date.parse(p.expiresAt) < deps.now().getTime() });
 
 export default async (req, context) => {
+  const off = requireConfigured(); // fail closed before any Blobs, Claude or GitHub access
+  if (off) return off;
   const limited = await rateLimit("proposals", context);
   if (limited) return limited;
   const auth = await requireSession(req, context);
