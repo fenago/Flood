@@ -2,7 +2,7 @@
 // GET /api/proposals?id=p_...   -> one proposal with "before" contents (at baseSha) for the diff view
 import { requireConfigured } from "../lib/configured.mjs";
 import { json, jsonError } from "../lib/http.mjs";
-import { requireSession } from "../lib/session.mjs";
+import { requireAdmin } from "../lib/auth.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
 import { openStore } from "../lib/blobs.mjs";
 import { githubConfig, makeGitHub, readFileAt } from "../lib/github.mjs";
@@ -20,7 +20,7 @@ export default async (req, context) => {
   if (off) return off;
   const limited = await rateLimit("proposals", context);
   if (limited) return limited;
-  const auth = await requireSession(req, context);
+  const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
   const store = openStore("proposals", context);
   const id = new URL(req.url).searchParams.get("id");

@@ -87,3 +87,22 @@ footer.notice p { margin: var(--space-2) 0; }
 @media (prefers-reduced-motion: no-preference) {
   .card, .banner { transition: opacity var(--motion-base) ease; }
 }
+
+/* Account screens (src/auth/ui.js). Solid surfaces; tokens only. */
+.auth h2 { font-size: var(--text-xl); margin: 0 0 var(--space-3); }
+.auth h2:focus { outline: none; }
+.auth-form { display: grid; gap: var(--space-4); }
+.field-row { margin: 0; }
+.field { width: 100%; min-height: var(--target-min); border-radius: var(--radius-md); border: 1px solid var(--color-separator); padding: var(--space-2) var(--space-4); font: inherit; background: var(--color-surface); color: var(--color-text); }
+.pw-wrap { display: flex; align-items: center; gap: var(--space-2); }
+.pw-wrap .field { flex: 1; min-width: 0; }
+.pw-toggle { text-decoration: none; font-weight: var(--weight-semibold); min-width: var(--target-min); }
+.auth-error:empty, .auth-info:empty { display: none; }
+.auth-error { background: var(--color-alert-bg); color: var(--color-alert-text); border-left: 6px solid var(--color-alert-edge); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); margin: 0 0 var(--space-4); }
+.auth-info { background: var(--color-surface-2); color: var(--color-text); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); margin: 0 0 var(--space-4); }
+.google-btn { display: flex; width: 100%; align-items: center; justify-content: center; gap: var(--space-3); }
+.g-mark { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-accent); font-weight: var(--weight-bold); }
+.or { text-align: center; margin: var(--space-3) 0; }
+.auth-links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: var(--space-3); }
+.link-as-btn { display: inline-flex; align-items: center; text-decoration: none; }
+.btn:disabled { opacity: 0.6; cursor: default; }

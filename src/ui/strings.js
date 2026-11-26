@@ -66,7 +66,7 @@ export const S = {
   INST_SETTINGS_ROW: 'Add to Home Screen',
   UPDATE_READY: 'A new version of Flood Watch is ready.',
   UPDATE_BTN: 'Reload',
-  TAB_OUTLOOK: 'Outlook', TAB_BEACH: 'Beach', TAB_CITIES: 'Cities', TAB_SETTINGS: 'Settings',
+  TAB_OUTLOOK: 'Outlook', TAB_BEACH: 'Beach', TAB_CITIES: 'Cities', TAB_SETTINGS: 'Settings', TAB_ACCOUNT: 'Account',
 };
 
 export const LEVEL_ICON = { Low: '●', Elevated: '▲', High: '◆', Severe: '■' }; // shape differs per level, aria-hidden

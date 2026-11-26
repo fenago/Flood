@@ -141,11 +141,12 @@ export function renderError(onRetry) {
     h('button', { type: 'button', class: 'btn', id: 'retry', onclick: onRetry }, S.ERR_BTN));
 }
 
-export function renderSettings({ units, onUnits, install }) {
+export function renderSettings({ units, onUnits, install, account }) {
   const radio = (value, label) => h('label', { class: 'radio' },
     h('input', { type: 'radio', name: 'units', value, checked: units.system === value, onchange: () => onUnits(value) }), label);
   return h('section', { 'aria-labelledby': 'settings-title' },
     h('h2', { id: 'settings-title', text: S.SETTINGS_TITLE }),
     h('div', { class: 'card' }, h('fieldset', {}, h('legend', { class: 'lead', text: S.UNITS_LABEL }), radio('us', S.UNITS_US), radio('metric', S.UNITS_METRIC))),
+    account ? h('div', { class: 'card', id: 'account-row' }, account) : null,
     h('div', { class: 'card', id: 'install-row' }, install));
 }

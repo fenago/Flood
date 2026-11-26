@@ -1,16 +1,16 @@
 // Per-IP fixed-window counters in Blobs for endpoints without a Netlify platform rule
-// (Free/Personal allow only 2 rules; we spend them on auth-login and agent-chat).
+// (Free/Personal allow only 2 rules; we spend them on session and agent-chat).
 import { openStore, incrementCounter, StorageError } from "./blobs.mjs";
-import { ipHash, sessionSecret } from "./session.mjs";
+import { ipHash } from "./auth.mjs";
 import { jsonError } from "./http.mjs";
 import { deps } from "./deps.mjs";
 
-export const LIMITS = { session: 60, agents: 30, proposals: 30, "proposal-approve": 5, "proposal-reject": 5, "auth-logout": 10 };
+export const LIMITS = { agents: 30, proposals: 30, "proposal-approve": 5, "proposal-reject": 5 };
 
 /** Returns a 429/503 Response when over the limit, else null. Fails closed on storage errors. */
 export async function rateLimit(endpoint, context, limit = LIMITS[endpoint], windowS = 60) {
   const win = Math.floor(deps.now().getTime() / (windowS * 1000));
-  const key = `counters/${endpoint}/${ipHash(context, sessionSecret())}/${win}`;
+  const key = `counters/${endpoint}/${ipHash(context)}/${win}`;
   try {
     const n = await incrementCounter(openStore("counters", context), key);
     if (n > limit) {

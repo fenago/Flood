@@ -6,6 +6,7 @@ const SHELL = [/*__FW_SHELL__*/];
 const SHELL_CACHE = `shell-${VERSION}`;
 const DATA_CACHE = 'data-v1'; // forecast responses; schema version, not app version
 const DATA_MAX_ENTRIES = 60;
+const AUTH_HOST = 'ygdswggaxtyzlcscgdrf.supabase.co'; // Supabase Auth: network only
 const DATA_HOSTS = new Set(['api.open-meteo.com', 'marine-api.open-meteo.com', 'api.tidesandcurrents.noaa.gov', 'api.weather.gov']);
 
 self.addEventListener('install', (event) => {
@@ -28,6 +29,8 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // Accounts: Supabase requests and /auth callbacks go straight to the network, never cached or intercepted.
+  if (url.hostname === AUTH_HOST || (url.origin === self.location.origin && (url.pathname.startsWith('/auth') || url.pathname.startsWith('/vendor/supabase.mjs?')))) return;
   // Authenticated / dynamic: never cache, never intercept.
   if (url.origin === self.location.origin && (url.pathname.startsWith('/api/') || url.pathname.startsWith('/console'))) return;
   if (DATA_HOSTS.has(url.hostname)) { event.respondWith(networkFirst(req)); return; }

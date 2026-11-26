@@ -1,9 +1,9 @@
-// POST /api/agent-chat - one streamed Claude turn (SSE). Session + Origin + CSRF required.
+// POST /api/agent-chat - one streamed Claude turn (SSE). Admin Supabase token + Origin check required.
 // Spec: knowledge/software-architect/examples/02-agent-chat-interface-spec.md
 import { requireConfigured } from "../lib/configured.mjs";
 import { randomBytes } from "node:crypto";
 import { jsonError, env, readJsonBody, SSE_HEADERS } from "../lib/http.mjs";
-import { requireWrite } from "../lib/session.mjs";
+import { requireAdminWrite } from "../lib/auth.mjs";
 import { openStore, casUpdate, StorageError } from "../lib/blobs.mjs";
 import { getAgent } from "../lib/agents.mjs";
 import { mapModel, mapEffort } from "../lib/models.mjs";
@@ -23,7 +23,7 @@ export default async (req, context) => {
   const off = requireConfigured(); // fail closed before any Blobs, Claude or GitHub access
   if (off) return off;
   if (req.method !== "POST") return jsonError(405, "method_not_allowed", "POST only", {}, { allow: "POST" });
-  const auth = await requireWrite(req, context);
+  const auth = await requireAdminWrite(req);
   if (auth.response) return auth.response;
   const { body, error } = await readJsonBody(req);
   if (error) return error;

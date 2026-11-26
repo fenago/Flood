@@ -10,12 +10,13 @@ import { scoreFlood } from './scoring/flood.js';
 import { scoreBeach } from './scoring/beach.js';
 import { validateScoringConfig } from './scoring/config.js';
 import { addDays } from './shared/time.js';
+import { renderAccount, accountRow, markRecovery, markCallbackError } from './auth/ui.js';
 
 const store = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
   set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
 };
-const state = { cities: [], config: null, cityId: store.get('fw-city'), units: makeUnits(store.get('fw-units') ?? 'us'), data: null, loadedAt: 0, locMessage: null, lastLead: null };
+const state = { userEmail: null, cities: [], config: null, cityId: store.get('fw-city'), units: makeUnits(store.get('fw-units') ?? 'us'), data: null, loadedAt: 0, locMessage: null, lastLead: null };
 const $ = (id) => document.getElementById(id);
 const city = () => state.cities.find((c) => c.id === state.cityId) ?? null;
 
@@ -46,10 +47,16 @@ function render() {
   const r = route();
   const c = city();
   clear(view);
+  if (r === 'account') {
+    setTabs('settings');
+    $('title').textContent = S.TAB_ACCOUNT;
+    view.append(renderAccount());
+    return;
+  }
   if (r === 'settings') {
     setTabs('settings');
     $('title').textContent = S.SETTINGS_TITLE;
-    view.append(renderSettings({ units: state.units, onUnits: (u) => { store.set('fw-units', u); state.units = makeUnits(u); render(); }, install: installRow() }));
+    view.append(renderSettings({ units: state.units, onUnits: (u) => { store.set('fw-units', u); state.units = makeUnits(u); render(); }, install: installRow(), account: accountRow(state.userEmail) }));
     return;
   }
   if (r === 'cities' || !c) {
@@ -112,10 +119,30 @@ function locate() {
   }, () => { state.locMessage = S.PICK_LOC_DENIED; render(); $('use-location')?.setAttribute('disabled', ''); }, { maximumAge: 600000, timeout: 10000 });
 }
 
+// Account support loads lazily: only when we are returning from a sign-in/reset email link or a session is
+// stored, so first-time visitors never download the auth library.
+async function startAuth() {
+  const p = new URLSearchParams(location.search);
+  const failed = /error_description=/.test(location.hash) || p.has('error_description');
+  const returning = p.has('code') || /access_token=|type=recovery/.test(location.hash);
+  let stored = false;
+  try { stored = Object.keys(localStorage).some((k) => k.startsWith('sb-')); } catch { /* private mode */ }
+  if (failed) { markCallbackError(); location.hash = '#/account'; }
+  else if (returning) location.hash = '#/account';
+  if (!(failed || returning || stored)) return;
+  const auth = await import('./auth/client.js');
+  auth.onAuthChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') { markRecovery(); if (route() !== 'account') location.hash = '#/account'; }
+    const next = session?.user?.email ?? null;
+    if (next !== state.userEmail) { state.userEmail = next; if (route() === 'settings') render(); }
+  });
+}
+
 async function boot() {
   initInstall();
   onInstallChange(() => { if (route() === 'settings') render(); });
   registerSw();
+  startAuth().catch(() => { /* account features are optional */ });
   const [cities, config] = await Promise.all([
     fetch('/data/cities.json').then((r) => r.json()),
     fetch('/config/scoring.json').then((r) => r.json()),

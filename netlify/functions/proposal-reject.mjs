@@ -1,7 +1,7 @@
-// POST /api/proposal-reject {id, note?} - pending -> rejected (conditional write). Session + CSRF required.
+// POST /api/proposal-reject {id, note?} - pending -> rejected (conditional write). Admin Supabase token + Origin check required.
 import { requireConfigured } from "../lib/configured.mjs";
 import { json, jsonError, readJsonBody } from "../lib/http.mjs";
-import { requireWrite } from "../lib/session.mjs";
+import { requireAdminWrite } from "../lib/auth.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
 import { openStore, casUpdate, StorageError } from "../lib/blobs.mjs";
 import { deps } from "../lib/deps.mjs";
@@ -14,7 +14,7 @@ export default async (req, context) => {
   if (off) return off;
   const limited = await rateLimit("proposal-reject", context);
   if (limited) return limited;
-  const auth = await requireWrite(req, context);
+  const auth = await requireAdminWrite(req);
   if (auth.response) return auth.response;
   const { body, error } = await readJsonBody(req, 8192);
   if (error) return error;

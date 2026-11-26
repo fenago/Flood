@@ -1,7 +1,7 @@
-// GET /api/agents - agent cards (name, description, model, personality). Session required.
+// GET /api/agents - agent cards (name, description, model, personality). Admin Supabase token required.
 import { requireConfigured } from "../lib/configured.mjs";
 import { json } from "../lib/http.mjs";
-import { requireSession } from "../lib/session.mjs";
+import { requireAdmin } from "../lib/auth.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
 import { listAgents } from "../lib/agents.mjs";
 
@@ -12,7 +12,7 @@ export default async (req, context) => {
   if (off) return off;
   const limited = await rateLimit("agents", context);
   if (limited) return limited;
-  const auth = await requireSession(req, context);
+  const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
   return json(200, { agents: listAgents() });
 };
