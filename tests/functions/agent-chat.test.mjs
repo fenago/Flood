@@ -3,20 +3,21 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { setup, call, login, parseSse, ctx } from "../helpers/harness.mjs";
-import loginFn from "../../netlify/functions/auth-login.mjs";
 import chat, { config } from "../../netlify/functions/agent-chat.mjs";
+import session from "../../netlify/functions/session.mjs";
 
-const send = (s, body, extra = {}) => call(chat, "/api/agent-chat", { method: "POST", body, cookie: s.cookie, csrf: s.csrf, ...extra });
+const send = (s, body, extra = {}) => call(chat, "/api/agent-chat", { method: "POST", body, token: s.token, ...extra });
 const msg = (text, conversationId = null, agent = "flood-risk-scientist") => ({ agent, conversationId, turnId: randomUUID(), input: { type: "message", text } });
 const cont = (conversationId, agent = "flood-risk-scientist") => ({ agent, conversationId, turnId: randomUUID(), input: { type: "continue" } });
 
 test("chat uses the second Netlify rule (20 / 60 s)", () => assert.equal(config.rateLimit.windowLimit, 20));
 
-test("auth, CSRF, validation and unknown agent are checked before any Claude call", async () => {
+test("auth, Origin, validation and unknown agent are checked before any Claude call", async () => {
   const env = await setup();
-  const s = await login(loginFn);
-  assert.equal((await call(chat, "/api/agent-chat", { method: "POST", body: msg("hi") })).status, 401); // no session
-  assert.equal((await send({ cookie: s.cookie, csrf: "x.y" }, msg("hi"))).status, 403);
+  const s = login(env);
+  assert.equal((await call(chat, "/api/agent-chat", { method: "POST", body: msg("hi") })).status, 401); // no token
+  assert.equal((await send({ token: s.token.slice(0, -4) + "AAAA" }, msg("hi"))).status, 401); // forged token
+  assert.equal((await send(login(env, { email: "visitor@example.com" }), msg("hi"))).status, 403); // signed-in, not admin
   assert.equal((await send(s, msg("hi"), { origin: "https://evil.test" })).status, 403);
   assert.equal((await send(s, { ...msg("hi"), model: "claude-opus-5-5" })).status, 400); // client never picks the model
   assert.equal((await send(s, { ...msg("hi"), turnId: "not-a-uuid" })).status, 400);
@@ -28,7 +29,7 @@ test("auth, CSRF, validation and unknown agent are checked before any Claude cal
 
 test("text-only turn streams start/text/done and sends the right request to Claude", async () => {
   const env = await setup({ claudeScript: [{ chunks: ["Low ", "risk today."] }] });
-  const s = await login(loginFn);
+  const s = login(env);
   const r = await send(s, msg("Any flood risk?"));
   assert.equal(r.status, 200);
   assert.match(r.headers.get("content-type"), /text\/event-stream/);
@@ -52,7 +53,7 @@ test("text-only turn streams start/text/done and sends the right request to Clau
 
 test("sonnet agents map to claude-sonnet-5-5 with default effort medium", async () => {
   const env = await setup({ claudeScript: [{ text: "hi" }] });
-  const s = await login(loginFn);
+  const s = login(env);
   await send(s, msg("hi", null, "qa-engineer"));
   assert.equal(env.claude.calls[0].model, "claude-sonnet-5-5");
   assert.deepEqual(env.claude.calls[0].output_config, { effort: "medium" });
@@ -64,7 +65,7 @@ test("tool loop: read_file -> continue -> propose_change stores a pending propos
     { text: "Proposing.", toolUses: [{ name: "propose_change", input: { summary: "Add a decision", files: [{ path: "docs/decisions.md", content: "# Decisions\nNew.\n" }] } }] },
     { text: "Done." },
   ] });
-  const s = await login(loginFn);
+  const s = login(env);
   const r1 = parseSse((await send(s, msg("Add a decision"))).body);
   const conv = r1[0].data.conversationId;
   assert.match(conv, /^c_/);
@@ -92,7 +93,7 @@ test("tool loop: read_file -> continue -> propose_change stores a pending propos
 test("propose_change with denied or traversal paths is rejected as a tool error and stores nothing", async () => {
   const env = await setup({ claudeScript: [{ toolUses: [{ name: "propose_change", input: { summary: "x", files: [
     { path: "netlify/functions/agent-chat.mjs", content: "evil" }, { path: "docs/../netlify.toml", content: "x" }, { path: "public/sw.js", content: "x" }] } }] }] });
-  const s = await login(loginFn);
+  const s = login(env);
   const ev = parseSse((await send(s, msg("do it"))).body);
   assert.equal(ev.find((e) => e.event === "proposal"), undefined);
   const tool = ev.filter((e) => e.event === "tool").at(-1);
@@ -103,7 +104,7 @@ test("propose_change with denied or traversal paths is rejected as a tool error 
 
 test("duplicate turnId is refused (409) and does not call Claude twice", async () => {
   const env = await setup({ claudeScript: [{ text: "a" }, { text: "b" }] });
-  const s = await login(loginFn);
+  const s = login(env);
   const first = parseSse((await send(s, msg("hi"))).body);
   const conv = first[0].data.conversationId;
   const body = msg("again", conv);
@@ -116,7 +117,7 @@ test("duplicate turnId is refused (409) and does not call Claude twice", async (
 
 test("daily token budget: over budget -> 429 budget_exhausted before calling Claude", async () => {
   const env = await setup({ claudeScript: [{ text: "big", inputTokens: 90000, outputTokens: 20000 }], envOverrides: { DAILY_TOKEN_BUDGET: "100000" } });
-  const s = await login(loginFn);
+  const s = login(env);
   assert.equal((await send(s, msg("one"))).status, 200);
   const r = await send(s, msg("two"));
   assert.equal(r.status, 429);
@@ -127,7 +128,7 @@ test("daily token budget: over budget -> 429 budget_exhausted before calling Cla
 
 test("Claude failure mid-turn -> error event, conversation unlocked and unchanged", async () => {
   const env = await setup({ claudeScript: [{ throw: Object.assign(new Error("overloaded"), { status: 529 }) }, { text: "ok now" }] });
-  const s = await login(loginFn);
+  const s = login(env);
   const ev = parseSse((await send(s, msg("hi"))).body);
   assert.equal(ev.at(-1).event, "error");
   assert.equal(ev.at(-1).data.error.code, "claude_unavailable");
@@ -139,16 +140,19 @@ test("Claude failure mid-turn -> error event, conversation unlocked and unchange
 
 test("truncated tool call at max_tokens is never executed", async () => {
   const env = await setup({ claudeScript: [{ stop_reason: "max_tokens", toolUses: [{ name: "propose_change", input: { summary: "x", files: [{ path: "docs/a.md", content: "x" }] } }] }] });
-  const s = await login(loginFn);
+  const s = login(env);
   const ev = parseSse((await send(s, msg("hi"))).body);
   assert.equal(ev.filter((e) => e.event === "tool").length, 0);
   assert.equal(ev.at(-1).data.stopReason, "max_tokens");
 });
 
-test("missing ANTHROPIC_API_KEY -> the whole console fails closed (503), even login", async () => {
+test("missing ANTHROPIC_API_KEY -> the whole console fails closed (503), even /api/session", async () => {
   const env = await setup({ envOverrides: { ANTHROPIC_API_KEY: undefined } });
-  const r = await call(loginFn, "/api/auth-login", { method: "POST", body: { password: "correct horse battery staple" } });
+  const s = login(env);
+  const r = await call(session, "/api/session", { token: s.token });
   assert.equal(r.status, 503);
   assert.equal(r.body.error.message, "console not configured");
+  assert.equal((await send(s, msg("hi"))).status, 503);
   assert.equal(env.claude.calls.length, 0);
+  assert.equal(env.supabase.calls.length, 0);
 });

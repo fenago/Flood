@@ -2,11 +2,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setup, call, login } from "../helpers/harness.mjs";
-import loginFn from "../../netlify/functions/auth-login.mjs";
 import proposals from "../../netlify/functions/proposals.mjs";
 import approve from "../../netlify/functions/proposal-approve.mjs";
 import reject from "../../netlify/functions/proposal-reject.mjs";
-import { PASSWORD } from "../helpers/harness.mjs";
 
 async function seed(env, over = {}) {
   const id = "p_testproposal000000001";
@@ -16,26 +14,26 @@ async function seed(env, over = {}) {
   await env.blobs.getStore("proposals").setJSON(`production/${id}`, p);
   return id;
 }
-const post = (fn, path, s, body) => call(fn, path, { method: "POST", body, cookie: s.cookie, csrf: s.csrf });
+const post = (fn, path, s, body) => call(fn, path, { method: "POST", body, token: s.token });
 const stored = async (env, id) => env.blobs.getStore("proposals").get(`production/${id}`, { type: "json" });
 
-test("GET proposal returns before/after for the diff; list shows it; 401 without session", async () => {
+test("GET proposal returns before/after for the diff; list shows it; 401 without a token", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
   assert.equal((await call(proposals, `/api/proposals?id=${id}`)).status, 401);
-  const r = await call(proposals, `/api/proposals?id=${id}`, { cookie: s.cookie });
+  const r = await call(proposals, `/api/proposals?id=${id}`, { token: s.token });
   assert.equal(r.status, 200);
   assert.equal(r.body.proposal.files[0].before, "# Decisions\n");
   assert.equal(r.body.proposal.files[0].after, "# Decisions\nNew line.\n");
-  const list = await call(proposals, "/api/proposals", { cookie: s.cookie });
+  const list = await call(proposals, "/api/proposals", { token: s.token });
   assert.deepEqual(list.body.proposals.map((p) => p.id), [id]);
-  assert.equal((await call(proposals, "/api/proposals?id=../x", { cookie: s.cookie })).status, 400);
+  assert.equal((await call(proposals, "/api/proposals?id=../x", { token: s.token })).status, 400);
 });
 
 test("approve commits once (atomic Git Data flow), records the commit, and a replay returns 409 without a second commit", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
   const r = await post(approve, "/api/proposal-approve", s, { id });
   assert.equal(r.status, 200);
@@ -54,21 +52,46 @@ test("approve commits once (atomic Git Data flow), records the commit, and a rep
   assert.equal(sentHeaders["x-github-api-version"], "2026-03-10");
 });
 
-test("approve needs recent auth: after 15 min it requires the password; wrong password 403", async () => {
+test("approve needs a recent sign-in: stale last_sign_in_at -> 403 'sign in again to approve', nothing committed", async () => {
   const env = await setup();
-  const s = await login(loginFn);
   const id = await seed(env);
-  env.advance(16 * 60 * 1000);
+  // Token is fresh and valid (refreshed now) but the account last signed in 16 minutes ago.
+  const old = login(env, { lastSignInAt: new Date(env.clock.t.getTime() - 16 * 60 * 1000) });
+  const r = await post(approve, "/api/proposal-approve", old, { id });
+  assert.equal(r.status, 403);
+  assert.equal(r.body.error.code, "reauth_required");
+  assert.equal(r.body.error.message, "sign in again to approve");
+  // A password field no longer bypasses the check (the console has no password).
+  assert.equal((await post(approve, "/api/proposal-approve", old, { id, password: "anything" })).status, 403);
+  // Same session-bound check via amr: account signed in recently elsewhere, but THIS token's session is old.
+  const otherSession = login(env, { amrAt: new Date(env.clock.t.getTime() - 60 * 60 * 1000) });
+  assert.equal((await post(approve, "/api/proposal-approve", otherSession, { id })).body.error.code, "reauth_required");
+  // token_refresh is not a sign-in.
+  const refreshedOnly = login(env, { amr: [{ method: "token_refresh", timestamp: Math.floor(env.clock.t.getTime() / 1000) }] });
+  assert.equal((await post(approve, "/api/proposal-approve", refreshedOnly, { id })).body.error.code, "reauth_required");
+  assert.equal(env.gh.writes(), 0);
+  assert.equal((await stored(env, id)).status, "pending");
+  // After the 15-minute window a fresh sign-in works.
+  env.advance(1000);
+  const fresh = login(env);
+  const ok = await post(approve, "/api/proposal-approve", fresh, { id });
+  assert.equal(ok.status, 200);
+  assert.equal((await stored(env, id)).approvedBy, "owner@example.com");
+});
+
+test("approve: a token whose sign-in ages past 15 min is refused, even though the token is still valid", async () => {
+  const env = await setup();
+  const id = await seed(env);
+  const s = login(env);
+  env.advance(16 * 60 * 1000); // past the 60 s auth cache too
   const r = await post(approve, "/api/proposal-approve", s, { id });
   assert.equal(r.status, 403);
   assert.equal(r.body.error.code, "reauth_required");
-  assert.equal((await post(approve, "/api/proposal-approve", s, { id, password: "wrong" })).body.error.code, "wrong_password");
-  assert.equal((await post(approve, "/api/proposal-approve", s, { id, password: PASSWORD })).status, 200);
 });
 
 test("stale base: main changed the same file since the proposal -> 409 stale, nothing committed", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
   env.gh.push({ "docs/decisions.md": "# Decisions\nSomeone else.\n" }, "human edit");
   const head = env.gh.head();
@@ -82,7 +105,7 @@ test("stale base: main changed the same file since the proposal -> 409 stale, no
 
 test("unrelated change on main still commits on the new head", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
   env.gh.push({ "README.md": "changed\n" }, "unrelated");
   assert.equal((await post(approve, "/api/proposal-approve", s, { id })).status, 200);
@@ -91,7 +114,7 @@ test("unrelated change on main still commits on the new head", async () => {
 
 test("GitHub failure -> 502, proposal back to pending with lastError", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
   env.gh.failNext("POST", 500);
   const r = await post(approve, "/api/proposal-approve", s, { id });
@@ -103,7 +126,7 @@ test("GitHub failure -> 502, proposal back to pending with lastError", async () 
 
 test("allow-list is re-checked at approve: a tampered stored proposal touching netlify/ is refused", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env, { files: [{ path: "netlify/functions/agent-chat.mjs", content: "evil" }] });
   const r = await post(approve, "/api/proposal-approve", s, { id });
   assert.equal(r.status, 400);
@@ -115,14 +138,14 @@ test("expired proposals (7 days) cannot be approved", async () => {
   const env = await setup();
   const id = await seed(env);
   env.advance(7 * 864e5 + 1000);
-  const s = await login(loginFn); // fresh session (sessions last 8 h)
-  const r = await post(approve, "/api/proposal-approve", s, { id, password: PASSWORD });
+  const s = login(env); // fresh sign-in
+  const r = await post(approve, "/api/proposal-approve", s, { id });
   assert.equal(r.status, 410);
 });
 
 test("reject: pending -> rejected; then approve is refused", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
   const r = await post(reject, "/api/proposal-reject", s, { id, note: "Not now" });
   assert.equal(r.status, 200);
@@ -131,12 +154,21 @@ test("reject: pending -> rejected; then approve is refused", async () => {
   assert.equal((await post(reject, "/api/proposal-reject", s, { id })).status, 409);
 });
 
-test("approve and reject require CSRF and same Origin", async () => {
+test("approve and reject require an admin token and the same Origin (when sent)", async () => {
   const env = await setup();
-  const s = await login(loginFn);
+  const s = login(env);
   const id = await seed(env);
-  assert.equal((await call(approve, "/api/proposal-approve", { method: "POST", body: { id }, cookie: s.cookie })).status, 403);
-  assert.equal((await call(approve, "/api/proposal-approve", { method: "POST", body: { id }, cookie: s.cookie, csrf: s.csrf, origin: "https://evil.test" })).status, 403);
-  assert.equal((await call(reject, "/api/proposal-reject", { method: "POST", body: { id }, cookie: s.cookie })).status, 403);
+  let n = 0; // a fresh client IP per attempt so the 5/min Blobs rate limit does not mask the status
+  const at = () => ({ ip: `198.51.100.${++n}`, requestId: "r", deploy: { context: "production" } });
+  assert.equal((await call(approve, "/api/proposal-approve", { method: "POST", body: { id } }, at())).status, 401);
+  assert.equal((await call(approve, "/api/proposal-approve", { method: "POST", body: { id }, token: s.token, origin: "https://evil.test" }, at())).status, 403);
+  assert.equal((await call(reject, "/api/proposal-reject", { method: "POST", body: { id } }, at())).status, 401);
+  assert.equal((await call(reject, "/api/proposal-reject", { method: "POST", body: { id }, token: s.token, origin: "https://evil.test" }, at())).status, 403);
+  const visitor = login(env, { email: "visitor@example.com" });
+  assert.equal((await call(approve, "/api/proposal-approve", { method: "POST", body: { id }, token: visitor.token }, at())).status, 403);
+  assert.equal((await call(reject, "/api/proposal-reject", { method: "POST", body: { id }, token: visitor.token }, at())).status, 403);
+  // Origin is optional (bearer tokens are never sent automatically); absent Origin + admin token works.
+  assert.equal((await call(reject, "/api/proposal-reject", { method: "POST", body: { id }, token: s.token, origin: null }, at())).status, 200);
+  assert.equal((await stored(env, id)).rejectedBy, "owner@example.com");
   assert.equal(env.gh.writes(), 0);
 });

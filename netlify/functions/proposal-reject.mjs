@@ -21,7 +21,7 @@ export default async (req, context) => {
   if (typeof body.id !== "string" || !PROPOSAL_ID.test(body.id)) return jsonError(400, "bad_request", "Invalid id");
   const note = typeof body.note === "string" ? body.note.slice(0, 1000) : "";
   try {
-    const r = await casUpdate(openStore("proposals", context), body.id, (p) => (p.status === "pending" ? { ...p, status: "rejected", note, rejectedAt: deps.now().toISOString() } : undefined));
+    const r = await casUpdate(openStore("proposals", context), body.id, (p) => (p.status === "pending" ? { ...p, status: "rejected", note, rejectedBy: auth.email, rejectedAt: deps.now().toISOString() } : undefined));
     if (!r.ok) return r.current ? jsonError(409, "already_processed", `Proposal is ${r.current.status}`, { status: r.current.status }) : jsonError(404, "not_found", "No such proposal");
     return json(200, { ok: true, status: "rejected" });
   } catch (e) {

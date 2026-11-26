@@ -1,9 +1,10 @@
-// POST /api/proposal-approve {id, password?} - human approval -> one atomic GitHub commit -> Netlify redeploy.
-// Re-validates session, Origin, CSRF, recent auth, allow-list and limits; pending -> approving with onlyIfMatch
+// POST /api/proposal-approve {id} - human approval -> one atomic GitHub commit -> Netlify redeploy.
+// Re-validates the admin Supabase token, Origin, recent sign-in (15 min), allow-list and limits;
+// pending -> approving with onlyIfMatch
 // so a double click or a replay can never commit twice.
 import { requireConfigured } from "../lib/configured.mjs";
-import { json, jsonError, env, readJsonBody } from "../lib/http.mjs";
-import { requireWrite, verifyPassword, REAUTH_WINDOW_MS } from "../lib/session.mjs";
+import { json, jsonError, readJsonBody } from "../lib/http.mjs";
+import { requireAdminWrite, recentlySignedIn } from "../lib/auth.mjs";
 import { rateLimit } from "../lib/ratelimit.mjs";
 import { openStore, casUpdate, StorageError } from "../lib/blobs.mjs";
 import { validateProposal } from "../lib/allowlist.mjs";
@@ -18,19 +19,14 @@ export default async (req, context) => {
   if (off) return off;
   const limited = await rateLimit("proposal-approve", context);
   if (limited) return limited;
-  const auth = await requireWrite(req, context);
+  const auth = await requireAdminWrite(req);
   if (auth.response) return auth.response;
   const { body, error } = await readJsonBody(req, 4096);
   if (error) return error;
   if (typeof body.id !== "string" || !PROPOSAL_ID.test(body.id)) return jsonError(400, "bad_request", "Invalid id");
-  if (body.password !== undefined && (typeof body.password !== "string" || body.password.length > 1024)) return jsonError(400, "bad_request", "Invalid password field");
 
-  // Recent auth: signed in within 15 min, or the password typed again now.
-  if (typeof body.password === "string" && body.password.length > 0) {
-    if (!(await verifyPassword(body.password, env("CONSOLE_PASSWORD_HASH")))) return jsonError(403, "wrong_password", "That password didn't match");
-  } else if (deps.now().getTime() - Date.parse(auth.session.record.authAt) > REAUTH_WINDOW_MS) {
-    return jsonError(403, "reauth_required", "Type your console password to approve");
-  }
+  // Recent auth: the owner signed in (not just refreshed) within the last 15 minutes.
+  if (!recentlySignedIn(auth.user, auth.claims)) return jsonError(403, "reauth_required", "sign in again to approve");
 
   const cfg = githubConfig();
   if (!cfg) return jsonError(503, "not_configured", "GitHub is not configured");
@@ -46,7 +42,7 @@ export default async (req, context) => {
     const problems = validateProposal(current);
     if (problems.length) return jsonError(400, "proposal_invalid", `Proposal fails the allow-list: ${problems.join("; ")}`);
 
-    const claim = await casUpdate(store, body.id, (p) => (p.status === "pending" ? { ...p, status: "approving", approvingAt: deps.now().toISOString() } : undefined));
+    const claim = await casUpdate(store, body.id, (p) => (p.status === "pending" ? { ...p, status: "approving", approvingAt: deps.now().toISOString(), approvedBy: auth.email } : undefined));
     if (!claim.ok) {
       const p = claim.current ?? {};
       return jsonError(409, "already_processed", `Proposal is ${p.status ?? "busy"}`, { status: p.status ?? null, commitSha: p.commitSha ?? null, commitUrl: p.commitUrl ?? null });

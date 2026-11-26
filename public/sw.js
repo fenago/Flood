@@ -30,7 +30,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   // Accounts: Supabase requests and /auth callbacks go straight to the network, never cached or intercepted.
-  if (url.hostname === AUTH_HOST || (url.origin === self.location.origin && (url.pathname.startsWith('/auth') || url.pathname.startsWith('/vendor/supabase.mjs?')))) return;
+  if (url.hostname === AUTH_HOST || (url.origin === self.location.origin && (url.pathname === '/auth' || url.pathname.startsWith('/auth/')))) return;
   // Authenticated / dynamic: never cache, never intercept.
   if (url.origin === self.location.origin && (url.pathname.startsWith('/api/') || url.pathname.startsWith('/console'))) return;
   if (DATA_HOSTS.has(url.hostname)) { event.respondWith(networkFirst(req)); return; }
