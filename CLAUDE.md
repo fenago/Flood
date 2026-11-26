@@ -57,6 +57,7 @@ The experts are project subagents in `.claude/agents/`. Their knowledge is in pr
   - `docs/04-agent-console.md`
   - `docs/05-testing-and-accessibility.md`
   - `docs/expert-roster.md`
+- `knowledge/<agent-name>/` is each agent's own reference library: `docs/` holds notes taken from the official documentation (each with its source link), and `examples/` holds small verified examples of good work. Every agent reads its folder before answering and prefers it over memory. Console agents cannot change `knowledge/`, because it is not on the allow-list.
 - Record design decisions in `docs/decisions.md`.
 - Agent and skill files follow the official Claude Code formats (https://code.claude.com/docs/en/sub-agents, https://code.claude.com/docs/en/skills). Change them through `agent-builder`. The extra `personality:` frontmatter field is for the Agent Console cards; Claude Code ignores it.
 

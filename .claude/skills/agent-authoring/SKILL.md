@@ -17,5 +17,10 @@ user-invocable: false
 - Background-knowledge skills set `user-invocable: false`. Never set `disable-model-invocation: true` on a skill an agent preloads (it blocks preloading).
 - Keep SKILL.md short and imperative (well under 500 lines); move long reference material to sibling files.
 
+## Knowledge folders
+- Every agent has `knowledge/<name>/`: `README.md` (index), `docs/` (reference notes from official documentation, each with `Source:` and `Retrieved:` lines), `examples/` (verified, runnable worked examples).
+- The agent body must start with the "Before you answer" section pointing at `knowledge/<name>/` (path must match `name`; exactly one per file).
+- Creating a new agent means creating its knowledge folder in the same change. Renaming an agent means renaming its folder.
+
 ## Keep in sync
 After any change, update `docs/expert-roster.md` and `CLAUDE.md` if roles or skill ownership moved, and check every `skills:` entry names an existing skill directory.

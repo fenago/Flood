@@ -36,4 +36,4 @@ A few details could not be fully confirmed from the docs pages and should be che
 
 ## The agent team
 
-The roster is implemented as Claude Code project subagents in `.claude/agents/` (12 agents) and project skills in `.claude/skills/` (41 skills). See `CLAUDE.md` at the repo root for how the orchestrator runs them.
+The roster is implemented as Claude Code project subagents in `.claude/agents/` (12 agents) and project skills in `.claude/skills/` (41 skills). See `CLAUDE.md` at the repo root for how the orchestrator runs them. Each agent also has a reference library in `knowledge/<agent-name>/` with official-doc notes and verified examples.
