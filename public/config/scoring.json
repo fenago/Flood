@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "_comment": "All cut-offs are HEURISTICS unless the key ends in a 'source' note. Sources: NWS products (docs/01 + knowledge/flood-risk-scientist/docs/01), NWS heat index (WPC algorithm), EPA UV categories. Edit with flood-risk-scientist review and fixture tests.",
+  "flood": {
+    "bands": { "r24In": [1, 2, 4, 6], "rmaxInPerH": [0.5, 1, 2, 3], "r72pastIn": [2, 4, 6] },
+    "soilWetM3M3": 0.27,
+    "tidePoints": 2,
+    "onshoreWindMph": 20,
+    "levelMaxPoints": { "Low": 2, "Elevated": 5, "High": 8 },
+    "nwsFloors": {
+      "_source": "NWS product definitions; mapping recommended by flood-risk-scientist (docs/decisions.md open item 4e).",
+      "Severe": ["Flash Flood Warning", "Flood Warning", "Coastal Flood Warning", "Storm Surge Warning", "Hurricane Warning"],
+      "High": ["Flood Watch", "Coastal Flood Advisory", "Coastal Flood Watch", "Storm Surge Watch", "Hurricane Watch", "Tropical Storm Warning"],
+      "Elevated": ["Flood Advisory", "Coastal Flood Statement"]
+    }
+  },
+  "beach": {
+    "windowHours": [10, 16],
+    "vetoCap": 10,
+    "vetoAlerts": ["Rip Current Statement", "Beach Hazards Statement"],
+    "vetoWarningPattern": "(Hurricane|Tropical Storm|Storm Surge|Flash Flood|Flood|Coastal Flood) Warning",
+    "thunderCodes": [95, 96, 97, 99],
+    "gustVetoMph": 30,
+    "waveVetoM": 2,
+    "heavyRain": { "_comment": "Heuristic (decision 4b): heavy rain most of the window caps the score in the Skip it band.", "codes": [63, 65, 81, 82], "minHours": 4, "cap": 35 },
+    "weights": { "rain": 25, "heat": 15, "wind": 15, "waves": 15, "water": 10, "sky": 10, "uv": 10 },
+    "labels": [[80, "Great beach day"], [60, "Good"], [40, "Meh"], [0, "Skip it"]]
+  }
+}

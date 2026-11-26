@@ -1,0 +1,17 @@
+{
+  "note": "Starter list from docs/01-use-case-and-scoring.md. Coordinates approximate. tideStation is set only where a NOAA CO-OPS station is confirmed (Virginia Key 8723214); onshoreFrom is the heuristic wind-direction sector (degrees, direction wind comes FROM) that pushes water onshore.",
+  "cities": [
+    { "id": "miami", "name": "Miami", "county": "Miami-Dade", "lat": 25.7617, "lon": -80.1918, "coastal": true, "tideStation": "8723214", "onshoreFrom": [20, 160] },
+    { "id": "miami-beach", "name": "Miami Beach", "county": "Miami-Dade", "lat": 25.7907, "lon": -80.13, "coastal": true, "tideStation": "8723214", "onshoreFrom": [20, 160] },
+    { "id": "hialeah", "name": "Hialeah", "county": "Miami-Dade", "lat": 25.8576, "lon": -80.2781, "coastal": false, "tideStation": null, "onshoreFrom": null },
+    { "id": "homestead", "name": "Homestead", "county": "Miami-Dade", "lat": 25.4687, "lon": -80.4776, "coastal": false, "tideStation": null, "onshoreFrom": null },
+    { "id": "key-west", "name": "Key West", "county": "Monroe", "lat": 24.5551, "lon": -81.78, "coastal": true, "tideStation": null, "onshoreFrom": [110, 250] },
+    { "id": "hollywood", "name": "Hollywood", "county": "Broward", "lat": 26.0112, "lon": -80.1495, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] },
+    { "id": "fort-lauderdale", "name": "Fort Lauderdale", "county": "Broward", "lat": 26.1224, "lon": -80.1373, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] },
+    { "id": "pompano-beach", "name": "Pompano Beach", "county": "Broward", "lat": 26.2379, "lon": -80.1248, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] },
+    { "id": "boca-raton", "name": "Boca Raton", "county": "Palm Beach", "lat": 26.3683, "lon": -80.1289, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] },
+    { "id": "delray-beach", "name": "Delray Beach", "county": "Palm Beach", "lat": 26.4615, "lon": -80.0728, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] },
+    { "id": "west-palm-beach", "name": "West Palm Beach", "county": "Palm Beach", "lat": 26.7153, "lon": -80.0534, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] },
+    { "id": "jupiter", "name": "Jupiter", "county": "Palm Beach", "lat": 26.9342, "lon": -80.0942, "coastal": true, "tideStation": null, "onshoreFrom": [20, 160] }
+  ]
+}
