@@ -11,6 +11,8 @@ This folder is the shared context for the team of expert agents that will build 
 | 3 | [03-architecture.md](03-architecture.md) | Static site + Netlify Functions, repo layout, Netlify limits (60 s / 15 min / 6 MB / 20 MB), Blobs, env vars, `netlify.toml`, deploy flow |
 | 4 | [04-agent-console.md](04-agent-console.md) | Listing agents, Claude API usage, propose → approve → commit → redeploy, password gate, fine-grained token, path allow-list, long jobs |
 | 5 | [05-testing-and-accessibility.md](05-testing-and-accessibility.md) | Test layers, PWA checks after Lighthouse dropped its PWA category, security tests, WCAG 2.2 AA plan |
+| — | [agent-brains.md](agent-brains.md) | Each agent's first name, model (opus/sonnet), why, personality and knowledge folder |
+| — | [decisions.md](decisions.md) | Decisions log and open owner questions |
 | — | [expert-roster.md](expert-roster.md) | The 12-agent expert team, one-line job for each, and which agents share each skill |
 
 ## Key decisions at a glance

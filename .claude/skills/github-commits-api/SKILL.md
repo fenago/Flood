@@ -5,7 +5,7 @@ user-invocable: false
 ---
 # GitHub REST: read and commit
 
-Headers: `Authorization: Bearer ${GITHUB_TOKEN}`, `Accept: application/vnd.github+json`, pinned `X-GitHub-Api-Version`.
+Headers: `Authorization: Bearer ${GITHUB_TOKEN}`, `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2026-03-10` (always send it: omitting it means `2022-11-28`; an unsupported version returns 410). Source: `knowledge/agent-console-engineer/docs/06-github-rest-commits.md`.
 
 Read: `GET /repos/{o}/{r}/contents/{path}?ref=main` (≤ 1 MB full support; use `application/vnd.github.raw+json` for raw). List: `GET /repos/{o}/{r}/git/trees/{sha}?recursive=1`.
 

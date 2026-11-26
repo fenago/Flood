@@ -19,20 +19,20 @@ The owner also gets a password-protected **Agent Console**, where the agents bel
 
 The experts are project subagents in `.claude/agents/`. Their knowledge is in project skills in `.claude/skills/<skill>/SKILL.md`. Each agent's `skills:` field preloads the full text of its skills when it starts. Roles and skill sharing are defined in `docs/expert-roster.md`.
 
-| Agent | Job |
-|---|---|
-| `orchestrator` | Leads the team: plans, runs experts in parallel, routes all handoffs, signs off releases |
-| `agent-builder` | Meta agent: builds, evaluates and improves the agents and skills |
-| `software-architect` | System design within the static + Functions + Blobs constraint |
-| `api-integration-open-meteo` | Open-Meteo, NOAA tides and NWS alerts clients, caching, attribution |
-| `flood-risk-scientist` | Flood and beach scoring, thresholds, calibration, honest uncertainty |
-| `pwa-mobile-engineer` | Front-end code, manifest, service worker, iPhone/Android behaviour |
-| `ux-designer-apple-hig` (Wren) | Flows, screens, wording, accessibility (Apple HIG) |
-| `ui-designer-apple-liquid-glass` (Sable) | Visual design in a Liquid Glass style, design tokens |
-| `agent-console-engineer` | Console Functions: Claude API, proposals, GitHub commits |
-| `security-engineer` | Auth, secrets, token, allow-list, CSP, rate limits; reviews sensitive changes |
-| `netlify-engineer` | netlify.toml, builds, env vars, Blobs, deploys, rollback |
-| `qa-engineer` | All testing, release evidence, post-deploy smoke tests |
+| Agent | Name · model | Job |
+|---|---|---|
+| `orchestrator` | Marlow · opus | Leads the team: plans, runs experts in parallel, routes all handoffs, signs off releases |
+| `agent-builder` | Ada · sonnet | Meta agent: builds, evaluates and improves the agents and skills |
+| `software-architect` | Theo · opus | System design within the static + Functions + Blobs constraint |
+| `api-integration-open-meteo` | Kai · sonnet | Open-Meteo, NOAA tides and NWS alerts clients, caching, attribution |
+| `flood-risk-scientist` | Nadia · opus | Flood and beach scoring, thresholds, calibration, honest uncertainty |
+| `pwa-mobile-engineer` | Remy · sonnet | Front-end code, manifest, service worker, iPhone/Android behaviour |
+| `ux-designer-apple-hig` | Wren · sonnet | Flows, screens, wording, accessibility (Apple HIG) |
+| `ui-designer-apple-liquid-glass` | Sable · sonnet | Visual design in a Liquid Glass style, design tokens |
+| `agent-console-engineer` | Quinn · opus | Console Functions: Claude API, proposals, GitHub commits |
+| `security-engineer` | Vera · opus | Auth, secrets, token, allow-list, CSP, rate limits; reviews sensitive changes |
+| `netlify-engineer` | Nash · sonnet | netlify.toml, builds, env vars, Blobs, deploys, rollback |
+| `qa-engineer` | Tess · sonnet | All testing, release evidence, post-deploy smoke tests |
 
 ## How the team works
 
