@@ -55,8 +55,8 @@ object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; 
 ```
 Console (`/console/*`): same but `connect-src 'self'`, plus `Cache-Control: no-store`,
 `Referrer-Policy: no-referrer`. Browsers enforce every CSP header they receive, so the extra rule can
-only tighten the `/*` rule (how Netlify combines two matching rules: (unconfirmed) - check the
-response headers on a Deploy Preview).
+only tighten the `/*` rule (CSP spec behaviour, not stated on the pages read; how Netlify combines two
+matching `[[headers]]` rules is also (unconfirmed) - check the response headers on a Deploy Preview).
 
 Function responses (JSON/SSE): `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
 `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`, correct `Content-Type`.
