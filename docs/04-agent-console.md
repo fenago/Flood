@@ -10,7 +10,7 @@ The Agent Console is a page inside the deployed app (`/console`) where the owner
 
 Claude Code subagents are Markdown files with YAML frontmatter; the body is the agent's system prompt. The standard fields are `name`, `description`, optional `tools`, and optional `model` (an alias such as `opus`, `sonnet`, `haiku`, `inherit`, or a full model ID).
 
-We add one field for the console: `personality` (one short line for the card). Check in a spike that Claude Code ignores the extra key **(verify)**; if it does not, put the personality line in the body under a `## Personality` heading and parse it from there.
+We add one field for the console: `personality` (one short line for the card). Confirmed in the Claude Code subagent docs: Claude Code ignores frontmatter fields it does not recognise, without an error. Agents also list their preloaded knowledge in `skills:` (see `.claude/skills/`).
 
 ```markdown
 ---
@@ -37,6 +37,7 @@ The agent files use aliases; the function maps them to API model IDs in one plac
 | `opus` / `inherit` / missing | `claude-opus-5-5` (default) |
 | `sonnet` | `claude-sonnet-5-5` |
 | `haiku` | `claude-haiku-5-5` |
+| `fable` | `claude-fable-5-2` |
 | full ID (e.g. `claude-opus-5-5`) | used as-is, but only if it is in an allow-list of IDs |
 
 ## 2. Claude API usage (from the function)

@@ -32,4 +32,8 @@ This folder is the shared context for the team of expert agents that will build 
 
 ## Items marked "(verify)"
 
-A few details could not be fully confirmed from the docs pages and should be checked in a short spike: NWS Surf Zone Forecast endpoint format, Lake Worth tide station ID, whether the 60 s limit applies unchanged to streamed responses, whether Claude Code tolerates the custom `personality` frontmatter key, and current iOS install behaviour.
+A few details could not be fully confirmed from the docs pages and should be checked in a short spike: NWS Surf Zone Forecast endpoint format, Lake Worth tide station ID, whether the 60 s limit applies unchanged to streamed responses, and current iOS install behaviour.
+
+## The agent team
+
+The roster is implemented as Claude Code project subagents in `.claude/agents/` (12 agents) and project skills in `.claude/skills/` (41 skills). See `CLAUDE.md` at the repo root for how the orchestrator runs them.

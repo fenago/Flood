@@ -2,7 +2,7 @@
 
 **Fixed decision:** Flood Watch is a PWA on Netlify. It has a static front end, and Netlify Functions are its only server code; they make the Claude API and GitHub calls. There are no other servers, databases or hosts (Netlify Blobs is the only storage). Every agent below works within that limit.
 
-Each agent will become a file in `.claude/agents/<name>.md`. The Agent Console lists them, and the meta agent maintains them.
+Each agent is a file in `.claude/agents/<name>.md`, and each skill below is a project skill in `.claude/skills/<skill>/SKILL.md`; agents preload their skills through the `skills:` field. The Agent Console lists them, and the meta agent maintains them.
 
 ## 1. The roster
 
