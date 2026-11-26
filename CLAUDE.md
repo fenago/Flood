@@ -5,7 +5,7 @@ Flood Watch is a mobile-first, installable web app (a PWA) for South Florida. A 
 - a **flood prognosis** (Low / Elevated / High / Severe) with reasons, and
 - a **beach-day score** (0–100).
 
-Users can register and sign in (email + password or Google, via Supabase Auth). The owner also gets an **Agent Console**, open only to signed-in accounts listed in `CONSOLE_ADMIN_EMAILS`, where the agents below can chat and propose code changes. A change is committed to GitHub only after the owner clicks Approve; the commit then redeploys the site on Netlify.
+**The whole app is behind a login gate:** visitors must register or sign in (email + password or Google, via Supabase Auth) before they see anything. The owner also gets an **Agent Console**, open only to signed-in accounts listed in `CONSOLE_ADMIN_EMAILS`, where the agents below can chat and propose code changes. A change is committed to GitHub only after the owner clicks Approve; the commit then redeploys the site on Netlify.
 
 ## Fixed decisions (do not change without the owner)
 
