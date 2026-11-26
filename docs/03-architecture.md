@@ -7,6 +7,9 @@
 3. **Functions only where a secret or a write is involved:** the Claude API key, the GitHub token, the console password check, NWS calls (if a `User-Agent` or caching is needed), and Netlify Blobs state.
 4. **No secrets ever reach the browser bundle.**
 
+
+> **Update 2026-11-26 — accounts.** The whole app is behind a login gate (Supabase Auth: email + password or Google). On launch the app shows a splash, checks the Supabase session, and renders either the gate or the app; no weather request is made while signed out. Profiles (first/last name, home city, units) live in the user's Supabase `user_metadata` and are display-only. Console Functions verify Supabase bearer tokens and allow only `CONSOLE_ADMIN_EMAILS`. See `docs/decisions.md`.
+
 ## 2. Diagram
 
 ```

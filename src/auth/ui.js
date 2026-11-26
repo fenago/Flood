@@ -1,12 +1,17 @@
 // Account screens: sign in, create account, forgot password, new password, signed-in view.
-// Signing in is optional; nothing else in the app depends on it. All text is set with textContent (dom.js).
+// The whole app is behind this gate (src/main.js). All text is set with textContent (dom.js).
 import { h } from '../ui/dom.js';
 import * as auth from './client.js';
 
 export const T = {
   TITLE: 'Account',
   LOADING: 'Checking your account…',
-  UNAVAILABLE: 'Sign-in unavailable right now. The flood outlook and beach score still work without an account.',
+  UNAVAILABLE: "Can't reach sign-in right now. Check your connection and try again.",
+  UNAVAIL_TITLE: 'Sign-in unavailable',
+  RETRY: 'Retry',
+  SIGNED_OUT: 'You are signed out.',
+  BRAND: 'Flood Watch',
+  PURPOSE: 'Flood outlook and beach-day score for South Florida. Sign in or create a free account to continue.',
   SIGNIN: 'Sign In',
   SIGNUP: 'Create Account',
   FORGOT: 'Reset Password',
@@ -28,7 +33,6 @@ export const T = {
   LINK_HAVE: 'Already have an account? Sign in',
   LINK_BACK: 'Back to sign in',
   OR: 'or',
-  OPTIONAL: 'An account is optional. Weather, flood and beach information work without one.',
   CONFIRM_TITLE: 'Check your email',
   CONFIRM_BODY: (email) => `Check your email to confirm your account. We sent a link to ${email}. Open it on this device, then sign in.`,
   RESET_SENT: (email) => `If ${email} has an account, a reset link is on its way. Open it on this device.`,
@@ -36,7 +40,8 @@ export const T = {
   GOOGLE_GO: 'Opening Google…',
   CALLBACK_ERR: "Sign-in didn't finish. Please try again.",
   ERR: {
-    unavailable: 'Sign-in unavailable right now. The flood outlook and beach score still work without an account.',
+    unavailable: "Can't reach sign-in right now. Check your connection and try again.",
+    no_session: 'Your session has ended. Please sign in again.',
     invalid_credentials: "That email and password don't match. Check them and try again, or reset your password.",
     email_not_confirmed: 'Check your email to confirm your account, then sign in.',
     network: "Can't reach the sign-in service. Check your connection and try again.",
@@ -59,12 +64,16 @@ let pendingError = '';
 export const markRecovery = () => { pendingRecovery = true; };
 export const markCallbackError = () => { pendingError = T.CALLBACK_ERR; };
 
-/** Settings-row content: link to the account screen. */
-export function accountRow(email) {
+/** Settings-row content (signed-in users only): email, sign out via the account page, and the profile prompt. */
+export function accountRow(email, profile) {
+  const has = Boolean(profile?.firstName);
   return h('div', {},
     h('p', { class: 'lead', text: T.TITLE }),
-    h('p', { class: 'muted', text: email ? `Signed in as ${email}` : 'Sign in or create a free account. It is optional.' }),
-    h('a', { class: 'btn secondary link-as-btn', id: 'account-link', href: '#/account' }, email ? 'Manage Account' : 'Sign In or Create Account'));
+    h('p', { class: 'muted', text: `Signed in as ${email ?? ''}` }),
+    h('a', { class: 'btn secondary link-as-btn', id: 'account-link', href: '#/account' }, 'Manage Account'),
+    has ? null : h('p', { class: 'lead', id: 'finish-profile', text: 'Finish your profile' }),
+    h('p', { class: 'muted', text: has ? `Profile: ${profile.firstName}` : 'Add your name and home city so Flood Watch can greet you and open to your city.' }),
+    h('a', { class: 'btn secondary link-as-btn', id: 'profile-link', href: '#/profile' }, has ? 'Edit Profile' : 'Create Profile'));
 }
 
 function field({ id, label, type = 'text', autocomplete, hint, minlength }) {
@@ -86,12 +95,20 @@ function field({ id, label, type = 'text', autocomplete, hint, minlength }) {
 
 const googleMark = () => h('span', { class: 'g-mark', 'aria-hidden': 'true', text: 'G' });
 
-export function renderAccount() {
-  const root = h('section', { class: 'auth', 'aria-labelledby': 'auth-title' });
+/**
+ * opts (all optional):
+ *  gate: true -> full-screen sign-in gate (brand header, no session lookup of its own)
+ *  initial: 'signin' | 'unavailable' (gate only)   error / info: first message to show
+ *  onSignedIn(session): gate: called after sign-in or sign-up with a session
+ *  onSignedOut(): in-app account page: called after a successful sign out
+ *  onRetry(): "Retry" on the unavailable card
+ */
+export function renderAccount(opts = {}) {
+  const { gate = false } = opts;
+  const root = h('section', { class: gate ? 'auth gate' : 'auth', 'aria-labelledby': 'auth-title' });
   let mode = 'loading';
   let session = null;
   let email = '';
-  let off = () => {};
 
   const setBusy = (btn, busy, idle, working) => {
     btn.disabled = busy; btn.textContent = busy ? working : idle;
@@ -102,18 +119,21 @@ export function renderAccount() {
   function show(next, { error = '', info = '' } = {}) {
     mode = next;
     root.replaceChildren();
-    const title = { loading: T.TITLE, unavailable: T.TITLE, signin: T.SIGNIN, signup: T.SIGNUP, forgot: T.FORGOT, recovery: T.NEWPW, confirm: T.CONFIRM_TITLE, signedin: T.SIGNED_IN }[next];
+    const title = { loading: T.TITLE, unavailable: T.UNAVAIL_TITLE, signin: T.SIGNIN, signup: T.SIGNUP, forgot: T.FORGOT, recovery: T.NEWPW, confirm: T.CONFIRM_TITLE, signedin: T.SIGNED_IN }[next];
     const heading = h('h2', { id: 'auth-title', tabindex: '-1', text: title });
     const errEl = h('p', { class: 'auth-error', id: 'auth-error', role: 'alert', text: error });
     const infoEl = h('p', { class: 'auth-info', id: 'auth-info', role: 'status', text: info });
     const setErr = (t) => { errEl.textContent = t; infoEl.textContent = ''; };
     const goto = (m) => show(m);
     const linkBtn = (text, m, id) => h('button', { type: 'button', class: 'link-btn auth-extra', id, onclick: () => goto(m) }, text);
+    if (gate) root.append(h('div', { class: 'gate-brand' }, h('h1', { id: 'gate-brand', text: T.BRAND }), h('p', { class: 'muted', id: 'gate-purpose', text: T.PURPOSE })));
     root.append(heading, errEl, infoEl);
 
     if (next === 'loading') root.append(h('p', { role: 'status', text: T.LOADING }));
-    else if (next === 'unavailable') root.append(h('p', { class: 'card', id: 'auth-unavailable', text: T.UNAVAILABLE }));
-    else if (next === 'confirm') {
+    else if (next === 'unavailable') {
+      root.append(h('div', { class: 'card' }, h('p', { id: 'auth-unavailable', text: T.UNAVAILABLE }),
+        opts.onRetry ? h('button', { type: 'button', class: 'btn', id: 'retry-btn', onclick: () => opts.onRetry() }, T.RETRY) : null));
+    } else if (next === 'confirm') {
       root.append(h('div', { class: 'card' }, h('p', { id: 'confirm-body', text: T.CONFIRM_BODY(email) }), linkBtn(T.LINK_BACK, 'signin', 'back-signin')));
     } else if (next === 'signedin') {
       const out = h('button', { type: 'button', class: 'btn', id: 'signout-btn' }, T.BTN_SIGNOUT);
@@ -121,11 +141,13 @@ export function renderAccount() {
         setBusy(out, true, T.BTN_SIGNOUT, T.BTN_SIGNINGOUT);
         const r = await auth.signOut();
         if (!r.ok) { setBusy(out, false, T.BTN_SIGNOUT, ''); setErr(errText(r.code)); return; }
-        session = null; show('signin', { info: 'You are signed out.' });
+        session = null;
+        if (opts.onSignedOut) opts.onSignedOut(); else show('signin', { info: 'You are signed out.' });
       });
       root.append(h('div', { class: 'card' },
         h('p', { class: 'muted', text: 'Signed in as' }), h('p', { class: 'lead', id: 'account-email', text: session?.user?.email ?? email }),
-        out, h('p', { class: 'muted small', text: T.OPTIONAL })));
+        gate ? null : h('p', {}, h('a', { class: 'btn secondary link-as-btn', id: 'account-profile-link', href: '#/profile' }, 'Edit Profile')),
+        out));
     } else {
       const form = h('form', { class: 'card auth-form', id: `form-${next}`, novalidate: true });
       const em = field({ id: 'auth-email', label: T.EMAIL, type: 'email', autocomplete: 'email' });
@@ -160,9 +182,13 @@ export function renderAccount() {
           if (r.code === 'unavailable') { show('unavailable'); return; }
           setErr(errText(r.code)); return;
         }
-        if (next === 'signin') { session = r.session; show('signedin'); }
-        else if (next === 'signup') { if (r.needsConfirmation) show('confirm'); else { session = await auth.getSession(); show('signedin'); } }
-        else if (next === 'recovery') { session = await auth.getSession(); show('signedin', { info: T.PW_SAVED }); }
+        const done = async (s, info) => {
+          session = s;
+          if (opts.onSignedIn) opts.onSignedIn(s); else show('signedin', { info });
+        };
+        if (next === 'signin') await done(r.session);
+        else if (next === 'signup') { if (r.needsConfirmation) show('confirm'); else await done(await auth.getSession()); }
+        else if (next === 'recovery') await done(await auth.getSession(), T.PW_SAVED);
         else { setBusy(submit, false, idle, working); infoEl.textContent = T.RESET_SENT(email); }
       });
       root.append(form);
@@ -181,8 +207,8 @@ export function renderAccount() {
       else if (next === 'signup') links.append(linkBtn(T.LINK_HAVE, 'signin', 'to-signin'));
       else if (next === 'forgot') links.append(linkBtn(T.LINK_BACK, 'signin', 'to-signin'));
       root.append(links);
-      if (next === 'signin' || next === 'signup') root.append(h('p', { class: 'muted small', text: T.OPTIONAL }));
     }
+    if (root.isConnected) heading.focus({ preventScroll: true }); // keep keyboard and screen-reader focus on the new heading
   }
 
   async function start() {
@@ -193,15 +219,11 @@ export function renderAccount() {
     if (pendingRecovery) { pendingRecovery = false; show('recovery'); }
     else if (session) show('signedin', { error: err });
     else show('signin', { error: err });
-    root.querySelector('#auth-title')?.focus();
-    off = auth.onAuthChange((event, s) => {
-      if (!root.isConnected) { off(); return; }
-      if (event === 'PASSWORD_RECOVERY') { session = s; show('recovery'); return; }
-      if (mode === 'recovery' || mode === 'confirm') return;
-      if (event === 'SIGNED_OUT' && mode === 'signedin') { session = null; show('signin'); }
-      else if (s && mode !== 'signedin' && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) { session = s; show('signedin'); }
-    });
   }
-  start();
+
+  if (gate) {
+    const err = pendingError; pendingError = '';
+    show(opts.initial ?? 'signin', { error: opts.error || err, info: opts.info ?? '' });
+  } else start();
   return root;
 }

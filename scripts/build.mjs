@@ -22,7 +22,7 @@ await cp(join(root, 'public'), out, { recursive: true });
 await cp(join(root, 'src'), join(out, 'src'), { recursive: true });
 
 // Vendor bundle: Supabase Auth client as one self-hosted ES module (CSP script-src 'self', no CDN).
-// Not in the precache shell (the shell regex below has no .mjs); it must load online.
+// In the precache shell (.mjs): the gate needs it on every launch, so a signed-in user can open the app offline.
 await esbuild({
   entryPoints: [join(root, 'scripts/supabase-entry.mjs')],
   outfile: join(out, 'vendor/supabase.mjs'),
@@ -31,7 +31,7 @@ await esbuild({
 
 // Shell = everything needed to start offline. The console is excluded (never cached).
 const all = (await walk(out)).map((p) => '/' + relative(out, p).split(sep).join('/'));
-const shell = all.filter((p) => p !== '/sw.js' && !p.startsWith('/console/') && /\.(html|css|js|json|webmanifest|png|svg)$/.test(p)).sort();
+const shell = all.filter((p) => p !== '/sw.js' && !p.startsWith('/console/') && /\.(html|css|js|mjs|json|webmanifest|png|svg)$/.test(p)).sort();
 const hash = createHash('sha256');
 for (const p of shell) hash.update(p).update(await readFile(join(out, p)));
 const version = hash.digest('hex').slice(0, 12);

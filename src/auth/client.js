@@ -7,6 +7,8 @@
 // Codes: unavailable | invalid_credentials | email_not_confirmed | network | weak_password |
 //        rate_limited | user_exists | unknown.
 
+import { parseProfile, prefillFrom, validateProfile } from './profile.js';
+
 const deps = {
   loadConfig: async () => {
     const r = await fetch('/config/auth.json');
@@ -129,4 +131,36 @@ export function onAuthChange(cb) {
     off = () => data?.subscription?.unsubscribe?.();
   });
   return () => { cancelled = true; off?.(); };
+}
+
+/** Stored session straight from localStorage (no network). Only for letting a returning user in while offline. */
+export function storedSession() {
+  try {
+    for (const k of Object.keys(localStorage)) {
+      if (!/^sb-.+-auth-token$/.test(k)) continue;
+      const s = JSON.parse(localStorage.getItem(k));
+      if (s && s.user && (s.user.email || s.user.id)) return s;
+    }
+  } catch { /* private mode or bad JSON */ }
+  return null;
+}
+
+/** { ok:true, profile, prefill } from the session's user_metadata, or { ok:false, code }. cityIds = ids from cities.json. */
+export async function getProfile(cityIds) {
+  const r = await call((c) => c.auth.getSession());
+  if (!r.ok) return r;
+  const user = r.data?.session?.user;
+  if (!user) return { ok: false, code: 'no_session' };
+  return { ok: true, profile: parseProfile(user.user_metadata, cityIds), prefill: prefillFrom(user.user_metadata) };
+}
+
+/** Validates, then updateUser({ data }) (metadata only). Resolves { ok:true, profile } or { ok:false, code[, field] }. */
+export async function saveProfile(fields, cityIds) {
+  const v = validateProfile(fields, cityIds);
+  if (!v.ok) return v;
+  const { firstName, lastName, homeCityId, units } = v.value;
+  const r = await call((c) => c.auth.updateUser({ data: { first_name: firstName, last_name: lastName, home_city_id: homeCityId, units } }));
+  if (!r.ok) return r;
+  const saved = r.data?.user?.user_metadata;
+  return { ok: true, profile: saved ? parseProfile(saved, cityIds) : { firstName, lastName, homeCityId, units } };
 }

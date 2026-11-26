@@ -10,13 +10,17 @@ import { scoreFlood } from './scoring/flood.js';
 import { scoreBeach } from './scoring/beach.js';
 import { validateScoringConfig } from './scoring/config.js';
 import { addDays } from './shared/time.js';
-import { renderAccount, accountRow, markRecovery, markCallbackError } from './auth/ui.js';
+import { renderAccount, accountRow, markRecovery, markCallbackError, T as AT } from './auth/ui.js';
+import { renderProfile, P } from './auth/profile-ui.js';
+import { parseProfile, prefillFrom } from './auth/profile.js';
+import * as auth from './auth/client.js';
 
 const store = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
   set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
 };
-const state = { userEmail: null, cities: [], config: null, cityId: store.get('fw-city'), units: makeUnits(store.get('fw-units') ?? 'us'), data: null, loadedAt: 0, locMessage: null, lastLead: null };
+const NO_PROFILE = { firstName: '', lastName: '', homeCityId: '', units: null };
+const state = { mode: 'splash', session: null, userEmail: null, profile: NO_PROFILE, prefill: { firstName: '', lastName: '' }, recovery: false, entering: false, loadingFor: null, cities: [], config: null, cityId: store.get('fw-city'), units: makeUnits(store.get('fw-units') ?? 'us'), data: null, loadedAt: 0, locMessage: null, lastLead: null };
 const $ = (id) => document.getElementById(id);
 const city = () => state.cities.find((c) => c.id === state.cityId) ?? null;
 
@@ -43,20 +47,28 @@ function announce(text) {
 }
 
 function render() {
+  if (state.mode !== 'app') return; // signed out: the gate owns the screen; no app content is ever rendered
   const view = $('view');
   const r = route();
   const c = city();
   clear(view);
+  $('account-btn').toggleAttribute('aria-current', r === 'account' || r === 'profile');
   if (r === 'account') {
     setTabs('settings');
     $('title').textContent = S.TAB_ACCOUNT;
-    view.append(renderAccount());
+    view.append(renderAccount({ onSignedOut: () => exitApp(AT.SIGNED_OUT) }));
+    return;
+  }
+  if (r === 'profile') {
+    setTabs('settings');
+    $('title').textContent = P.TITLE;
+    view.append(renderProfile({ profile: state.profile, prefill: state.prefill, cities: state.cities, units: state.units.system, onSaved: applyProfile }));
     return;
   }
   if (r === 'settings') {
     setTabs('settings');
     $('title').textContent = S.SETTINGS_TITLE;
-    view.append(renderSettings({ units: state.units, onUnits: (u) => { store.set('fw-units', u); state.units = makeUnits(u); render(); }, install: installRow(), account: accountRow(state.userEmail) }));
+    view.append(renderSettings({ units: state.units, onUnits: (u) => { store.set('fw-units', u); state.units = makeUnits(u); render(); }, install: installRow(), account: accountRow(state.userEmail, state.profile) }));
     return;
   }
   if (r === 'cities' || !c) {
@@ -66,9 +78,11 @@ function render() {
     return;
   }
   $('title').textContent = c.name;
+  if (r !== 'beach') view.append(h('p', { class: 'greeting', id: 'greeting', text: state.profile.firstName ? `Hello, ${state.profile.firstName}` : 'Hello' }));
   const d = state.data;
   if (!d || d.cityId !== c.id) {
     view.append(h('p', { role: 'status', text: S.LOAD(c.name) }), h('div', { class: 'skeleton', 'aria-hidden': 'true' }));
+    if (state.loadingFor !== c.id) refresh();
     return;
   }
   const scored = compute();
@@ -95,8 +109,12 @@ function render() {
 async function refresh() {
   const c = city();
   if (!c) return;
+  if (state.mode !== 'app') return;
+  state.loadingFor = c.id;
   $('topstatus').textContent = S.UPDATING;
   const data = await loadCity(c);
+  if (state.loadingFor === c.id) state.loadingFor = null;
+  if (state.mode !== 'app') return; // signed out while loading: drop the result
   data.cityId = c.id;
   data.offline = !navigator.onLine;
   if (state.cityId === c.id) { state.data = data; state.loadedAt = Date.now(); }
@@ -107,7 +125,7 @@ async function refresh() {
 function pickCity(id) {
   state.cityId = id; store.set('fw-city', id); state.data = null; state.locMessage = null;
   location.hash = '#/outlook';
-  render(); refresh();
+  render();
 }
 
 function locate() {
@@ -119,47 +137,144 @@ function locate() {
   }, () => { state.locMessage = S.PICK_LOC_DENIED; render(); $('use-location')?.setAttribute('disabled', ''); }, { maximumAge: 600000, timeout: 10000 });
 }
 
-// Account support loads lazily: only when we are returning from a sign-in/reset email link or a session is
-// stored, so first-time visitors never download the auth library.
-async function startAuth() {
-  const p = new URLSearchParams(location.search);
-  const failed = /error_description=/.test(location.hash) || p.has('error_description');
-  const returning = p.has('code') || /access_token=|type=recovery/.test(location.hash);
-  let stored = false;
-  try { stored = Object.keys(localStorage).some((k) => k.startsWith('sb-')); } catch { /* private mode */ }
-  if (failed) { markCallbackError(); location.hash = '#/account'; }
-  else if (returning) location.hash = '#/account';
-  if (!(failed || returning || stored)) return;
-  const auth = await import('./auth/client.js');
-  auth.onAuthChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY') { markRecovery(); if (route() !== 'account') location.hash = '#/account'; }
-    const next = session?.user?.email ?? null;
-    if (next !== state.userEmail) { state.userEmail = next; if (route() === 'settings') render(); }
-  });
+
+// ---- Login gate -------------------------------------------------------------------------------------------
+// Nothing from the app renders (and no Open-Meteo/NOAA/NWS request is made) until a session exists.
+const setMode = (m) => { state.mode = m; document.body.dataset.mode = m; };
+const skipKey = (session) => `fw-profile-skipped-${session?.user?.id ?? 'x'}`;
+
+function showSplash() {
+  clear($('view')).append(h('div', { class: 'splash' }, h('p', { class: 'splash-brand', text: AT.BRAND }), h('div', { class: 'spinner', 'aria-hidden': 'true' }), h('p', { role: 'status', class: 'muted', text: AT.LOADING })));
 }
 
-async function boot() {
-  initInstall();
-  onInstallChange(() => { if (route() === 'settings') render(); });
-  registerSw();
-  startAuth().catch(() => { /* account features are optional */ });
-  const [cities, config] = await Promise.all([
+function showGate(initial = 'signin', { error = '', info = '' } = {}) {
+  setMode('gate');
+  const view = $('view');
+  clear(view).append(renderAccount({ gate: true, initial, error, info, onSignedIn: (s) => enterApp(s), onRetry: () => gateBoot() }));
+  document.title = `${AT.BRAND} · ${AT.SIGNIN}`;
+  view.querySelector('#auth-title')?.focus({ preventScroll: true });
+}
+
+function updateAccountBtn() {
+  const src = state.profile.firstName || state.userEmail || '';
+  $('account-initial').textContent = (Array.from(src)[0] ?? 'A').toUpperCase();
+}
+
+function loadStatic() {
+  state.staticReady ??= Promise.all([
     fetch('/data/cities.json').then((r) => r.json()),
     fetch('/config/scoring.json').then((r) => r.json()),
-  ]);
-  state.cities = cities.cities;
-  state.config = validateScoringConfig(config);
-  if (!city()) state.cityId = null;
-  window.addEventListener('hashchange', render);
-  window.addEventListener('online', refresh);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && Date.now() - state.loadedAt > 10 * 60 * 1000) refresh();
-  });
-  render();
-  if (city()) refresh();
+  ]).then(([cities, config]) => {
+    state.cities = cities.cities;
+    state.config = validateScoringConfig(config);
+  }).catch((e) => { state.staticReady = null; throw e; });
+  return state.staticReady;
 }
 
-boot().catch(() => {
+/** Apply a saved profile: units, home city (only when it changed), account button. No re-render: the profile page keeps its "saved" status. */
+function applyProfile(p) {
+  const prevHome = state.profile.homeCityId;
+  state.profile = p;
+  if (p.units) { store.set('fw-units', p.units); state.units = makeUnits(p.units); }
+  if (p.homeCityId && p.homeCityId !== prevHome) { state.cityId = p.homeCityId; store.set('fw-city', p.homeCityId); state.data = null; state.locMessage = null; }
+  updateAccountBtn();
+}
+
+let bound = false;
+function bindOnce() {
+  if (bound) return; bound = true;
+  window.addEventListener('hashchange', render);
+  window.addEventListener('online', () => { if (state.mode === 'app' && city()) refresh(); });
+  document.addEventListener('visibilitychange', () => {
+    if (state.mode === 'app' && city() && document.visibilityState === 'visible' && Date.now() - state.loadedAt > 10 * 60 * 1000) refresh();
+  });
+}
+
+function startApp() {
+  setMode('app');
+  document.title = 'Flood Watch South Florida';
+  updateAccountBtn();
+  render();
+  $('view').focus({ preventScroll: true });
+}
+
+function showOnboarding(session) {
+  setMode('onboard');
   const view = $('view');
-  clear(view).append(renderError(() => location.reload()));
-});
+  clear(view).append(renderProfile({
+    onboarding: true, profile: state.profile, prefill: state.prefill, cities: state.cities, units: state.units.system,
+    onSaved: (p) => { applyProfile(p); startApp(); },
+    onSkip: () => { store.set(skipKey(session), '1'); startApp(); },
+  }));
+  view.querySelector('#profile-title')?.focus({ preventScroll: true });
+}
+
+async function enterApp(session) {
+  if (state.entering || state.mode === 'app') return;
+  if (!session?.user) { showGate('signin'); return; }
+  state.entering = true;
+  try {
+    await loadStatic();
+    const meta = session.user.user_metadata;
+    const ids = state.cities.map((c) => c.id);
+    state.session = session;
+    state.userEmail = session.user.email ?? '';
+    state.profile = parseProfile(meta, ids);
+    state.prefill = prefillFrom(meta);
+    if (state.profile.units) { store.set('fw-units', state.profile.units); state.units = makeUnits(state.profile.units); }
+    if (!city() && state.profile.homeCityId) { state.cityId = state.profile.homeCityId; store.set('fw-city', state.cityId); }
+    if (!city()) state.cityId = null;
+    bindOnce();
+    // Land on the requested route; a sign-in callback hash (#access_token=...) is replaced by the default route.
+    if (state.recovery) { state.recovery = false; history.replaceState(null, '', `${location.pathname}#/account`); }
+    else if (/access_token=|error_description=|type=/.test(location.hash)) history.replaceState(null, '', `${location.pathname}#/outlook`);
+    if (!state.profile.firstName && !state.recovery && !store.get(skipKey(session)) && route() !== 'account') { showOnboarding(session); return; }
+    startApp();
+  } catch {
+    setMode('app');
+    clear($('view')).append(renderError(() => location.reload()));
+  } finally { state.entering = false; }
+}
+
+function exitApp(info = '') {
+  state.session = null; state.userEmail = null; state.profile = NO_PROFILE; state.prefill = { firstName: '', lastName: '' };
+  state.data = null; state.loadedAt = 0; state.loadingFor = null; state.lastLead = null; state.locMessage = null;
+  for (const id of ['live', 'topstatus', 'toast']) $(id).textContent = '';
+  clear($('view'));
+  updateAccountBtn();
+  showGate('signin', { info });
+}
+
+let subscribed = false;
+function subscribe() {
+  if (subscribed) return; subscribed = true;
+  auth.onAuthChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      markRecovery(); state.recovery = true;
+      if (state.mode === 'app') { location.hash = '#/account'; render(); }
+    } else if (event === 'SIGNED_OUT') {
+      if (state.mode === 'app' || state.mode === 'onboard') exitApp(AT.SIGNED_OUT);
+    } else if (event === 'USER_UPDATED' && session && state.mode === 'app') {
+      state.session = session; state.userEmail = session.user?.email ?? state.userEmail;
+      state.profile = parseProfile(session.user?.user_metadata, state.cities.map((c) => c.id)); updateAccountBtn();
+    } else if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && state.mode === 'gate') enterApp(session);
+  });
+}
+
+async function gateBoot() {
+  setMode('splash'); showSplash();
+  const q = new URLSearchParams(location.search);
+  if (/error_description=/.test(location.hash) || q.has('error_description')) markCallbackError();
+  if (!(await auth.isAvailable())) { showGate('unavailable'); return; }
+  subscribe();
+  let session = await auth.getSession();
+  if (!session && !navigator.onLine) session = auth.storedSession(); // returning user, offline: let them in
+  if (session) { await enterApp(session); return; }
+  if (!navigator.onLine) { showGate('unavailable'); return; }
+  showGate('signin');
+}
+
+initInstall();
+onInstallChange(() => { if (state.mode === 'app' && route() === 'settings') render(); });
+registerSw();
+gateBoot().catch(() => showGate('unavailable'));

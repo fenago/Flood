@@ -13,16 +13,17 @@
   <link rel="stylesheet" href="/src/ui/app.css">
   <script type="module" src="/src/main.js"></script>
 </head>
-<body>
+<body data-mode="splash">
   <a class="visually-hidden" href="#view">Skip to content</a>
   <header class="topbar glass">
     <h1 id="title">Flood Watch</h1>
     <span class="status" id="topstatus" aria-live="off"></span>
     <a class="link-btn" href="#/cities" id="change-city">Change City</a>
+    <a class="account-btn" href="#/account" id="account-btn" aria-label="Account"><span id="account-initial" aria-hidden="true">A</span></a>
   </header>
   <main>
     <div id="update-slot"></div>
-    <div id="view" tabindex="-1"><p role="status">Loading Flood Watch…</p></div>
+    <div id="view" tabindex="-1"><div class="splash"><p class="splash-brand">Flood Watch</p><div class="spinner" aria-hidden="true"></div><p role="status" class="muted">Checking your account…</p></div></div>
     <div id="live" class="visually-hidden" aria-live="polite"></div>
     <div id="toast" class="visually-hidden" role="status"></div>
     <footer class="notice">

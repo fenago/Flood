@@ -3,8 +3,10 @@
 import { test, expect } from "@playwright/test";
 import { AxeBuilder } from "@axe-core/playwright";
 import { mockApis, NOW, NO_ALERTS } from "./mocks.mjs";
+import { seedSession, mockSupabase } from "./auth-helper.mjs";
 
 test.use({ serviceWorkers: "block" });
+test.beforeEach(async ({ context }) => { await seedSession(context); });
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 async function scan(page, testInfo, name) {

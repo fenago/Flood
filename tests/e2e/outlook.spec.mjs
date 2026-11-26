@@ -2,9 +2,10 @@
 // sees every request; tests/e2e/pwa.spec.mjs covers the service worker, offline and updates.
 import { test, expect } from "@playwright/test";
 import { mockApis, NOW, NO_ALERTS } from "./mocks.mjs";
+import { seedSession } from "./auth-helper.mjs";
 
 test.use({ serviceWorkers: "block" });
-test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(NOW); });
+test.beforeEach(async ({ page, context }) => { await seedSession(context); await page.clock.setFixedTime(NOW); });
 
 async function pickMiamiBeach(page) {
   await page.goto("/");

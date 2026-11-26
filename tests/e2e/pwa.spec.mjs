@@ -7,8 +7,11 @@ import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import http from "node:http";
 import { mockApis, NOW } from "./mocks.mjs";
+import { seedSession } from "./auth-helper.mjs";
 
 test.skip(({ browserName }) => browserName !== "chromium", "SW + CDP need Chromium");
+
+test.beforeEach(async ({ context }) => { await seedSession(context); });
 
 async function openCity(page) {
   await page.goto("/");

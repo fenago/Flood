@@ -106,3 +106,21 @@ footer.notice p { margin: var(--space-2) 0; }
 .auth-links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: var(--space-3); }
 .link-as-btn { display: inline-flex; align-items: center; text-decoration: none; }
 .btn:disabled { opacity: 0.6; cursor: default; }
+
+/* Login gate: until the app is entered, only the gate/splash and the footer notice show. */
+body:not([data-mode="app"]) .topbar, body:not([data-mode="app"]) .tabbar { display: none; }
+body:not([data-mode="app"]) main { padding-bottom: var(--space-8); }
+.splash { display: grid; justify-items: center; gap: var(--space-4); padding: var(--space-8) 0; min-height: 40vh; align-content: center; }
+.splash-brand { font-size: var(--text-3xl); font-weight: var(--weight-bold); margin: 0; }
+.spinner { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 4px solid var(--color-surface-2); border-top-color: var(--color-accent); }
+@media (prefers-reduced-motion: no-preference) { .spinner { animation: fw-spin 0.9s linear infinite; } }
+@keyframes fw-spin { to { transform: rotate(360deg); } }
+.gate-brand h1 { font-size: var(--text-3xl); margin: var(--space-4) 0 var(--space-2); }
+.gate-brand p { margin: 0 0 var(--space-5); }
+.auth.gate { padding-top: var(--space-4); }
+.profile h1, .profile h2 { font-size: var(--text-xl); margin: 0 0 var(--space-3); }
+.profile h1:focus, .profile h2:focus { outline: none; }
+select.field { appearance: auto; }
+.greeting { font-size: var(--text-lg); font-weight: var(--weight-semibold); margin: 0 0 var(--space-3); }
+.account-btn { display: inline-grid; place-items: center; width: var(--target-min); height: var(--target-min); border-radius: var(--radius-pill); background: var(--color-surface-2); color: var(--color-text); font-weight: var(--weight-bold); text-decoration: none; flex: none; }
+.account-btn[aria-current] { outline: 2px solid var(--color-accent); }
