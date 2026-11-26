@@ -12,8 +12,13 @@ This folder is the shared context for the team of expert agents that will build 
 | 4 | [04-agent-console.md](04-agent-console.md) | Listing agents, Claude API usage, propose → approve → commit → redeploy, password gate, fine-grained token, path allow-list, long jobs |
 | 5 | [05-testing-and-accessibility.md](05-testing-and-accessibility.md) | Test layers, PWA checks after Lighthouse dropped its PWA category, security tests, WCAG 2.2 AA plan |
 | — | [agent-brains.md](agent-brains.md) | Each agent's first name, model (opus/sonnet), why, personality and knowledge folder |
-| — | [decisions.md](decisions.md) | Decisions log and open owner questions |
+| — | [decisions.md](decisions.md) | Decisions log, provisional defaults and open owner questions |
+| — | [deploy.md](deploy.md) | Step-by-step Netlify setup for v1, smoke test, env vars for the console later, GitHub token, plan notes. **Security review PENDING.** |
 | — | [expert-roster.md](expert-roster.md) | The 12-agent expert team, one-line job for each, and which agents share each skill |
+
+## v1 status (2026-11-26)
+
+v1 = the public PWA (city picker, flood outlook with NWS alerts first, NOAA tides, beach score, settings, offline, install, update banner). Code: `public/`, `src/` (api, scoring, ui, shared), `netlify/` (console Functions, **fail closed** until configured; console UI deferred). Build: `npm run build` → `dist/`. Tests: `npm test` (node:test) and `npm run test:e2e` (Playwright). Deploy: [deploy.md](deploy.md). **Security review by security-engineer is PENDING.**
 
 ## Key decisions at a glance
 

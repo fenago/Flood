@@ -1,5 +1,7 @@
 # 04 · Agent Console: design, security and long jobs
 
+> **v1 status (2026-11-26):** the console **Functions** are built and tested (`netlify/functions/`, `netlify/lib/`) but **fail closed** with 503 "console not configured" until `CONSOLE_PASSWORD_HASH`, `SESSION_SECRET`, `ANTHROPIC_API_KEY` and `GITHUB_TOKEN` are all set. The console **UI is deferred** (owner decision). Endpoints as built: `auth-login`, `auth-logout`, `session` (GET, returns the CSRF token), `agents`, `agent-chat`, `proposals` (GET list or `?id=`), `proposal-approve`, `proposal-reject`; no background job endpoints yet. **Security review PENDING** (`docs/decisions.md`).
+
 The Agent Console is a page inside the deployed app (`/console`) where the owner can:
 
 1. See **every agent in `.claude/agents/`** with its name, model and personality.

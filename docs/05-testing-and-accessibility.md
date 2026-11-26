@@ -2,6 +2,8 @@
 
 ## 1. Test layers
 
+As built in v1: `npm test` runs `tests/unit` (scoring + parsers on real fixtures in `tests/fixtures/`), `tests/functions` (handlers with in-memory Blobs, scripted Claude, in-memory GitHub; one test uses the real SDK against a local mock server) and `tests/security` (allow-list attacks, CSRF, replay, auth, fail-closed, secrets grep). `npm run test:e2e` builds and runs Playwright (`playwright.config.mjs`, projects `pixel-7` and `iphone-15`; WebKit is not installed in the agent container, so `iphone-15` runs Chromium with the iPhone viewport unless `FW_IPHONE_ON_WEBKIT=1`). `npm run smoke` serves `dist/` with the real handlers and mocked deps.
+
 | Layer | Tool (suggested) | What it covers |
 |---|---|---|
 | Unit | Vitest or `node:test` | Flood and beach scoring functions, band thresholds, veto rules, unit conversion, city lookup. Pure functions → table-driven tests. |

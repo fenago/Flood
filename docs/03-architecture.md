@@ -89,8 +89,8 @@ Never prefix any of these with a bundler's public prefix (`VITE_`, `PUBLIC_`, `N
 
 ```toml
 [build]
-  command = "node scripts/build-agents-manifest.mjs && npm run build"
-  publish = "public"
+  command = "npm run build"     # as built: see note below
+  publish = "dist"
 
 [functions]
   node_bundler = "esbuild"
@@ -109,7 +109,21 @@ Never prefix any of these with a bundler's public prefix (`VITE_`, `PUBLIC_`, `N
     Cache-Control = "no-cache"
 ```
 
-Note: the NWS `alerts` proxy function above conflicts with `CLAUDE.md` fixed decision 2 (browser calls NWS directly). This is an open owner decision; see `docs/decisions.md`.
+Note: the NWS `alerts` proxy function in the diagram above conflicts with `CLAUDE.md` fixed decision 2 and was **not built**: v1 calls NWS from the browser (provisional, `docs/decisions.md`). The real `netlify.toml` (repo root) differs from this sketch: `command = "npm run build"`, `publish = "dist"`, no `included_files` (agent definitions are compiled into `netlify/lib/agents.generated.mjs`), plus `/console/*` and `/manifest.webmanifest` header rules.
+
+## 5a. As built in v1
+
+```
+public/            index.html, manifest.webmanifest, sw.js (template), icons/, data/cities.json, config/scoring.json
+src/               main.js; api/ (open-meteo, noaa-tides, nws-alerts, fetch-json); scoring/ (flood, beach, heat, config);
+                   ui/ (views, strings, format, load, install, sw-register, dom, tokens.css, app.css); shared/time.js
+netlify/functions/ auth-login, auth-logout, session, agents, agent-chat, proposals, proposal-approve, proposal-reject
+netlify/lib/       http, deps, blobs, session, configured, ratelimit, budget, models, agents, allowlist, github, tools, chat, sse, ids
+scripts/           build-agents-manifest.mjs, build.mjs, check-secrets.mjs, serve.mjs, dev-functions.mjs, smoke-local.mjs, hash-password.mjs
+dist/              build output (public/ + src/ at /src, stamped sw.js) - the publish directory
+```
+
+Dependency rules: `src/scoring` imports only `src/shared`; `src/api` imports `src/shared`; `src/ui` may import both; functions import only `netlify/lib`.
 
 ## 6. Deploy flow
 
