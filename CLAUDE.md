@@ -5,14 +5,14 @@ Flood Watch is a mobile-first, installable web app (a PWA) for South Florida. A 
 - a **flood prognosis** (Low / Elevated / High / Severe) with reasons, and
 - a **beach-day score** (0–100).
 
-The owner also gets a password-protected **Agent Console**, where the agents below can chat and propose code changes. A change is committed to GitHub only after the owner clicks Approve; the commit then redeploys the site on Netlify.
+Users can register and sign in (email + password or Google, via Supabase Auth). The owner also gets an **Agent Console**, open only to signed-in accounts listed in `CONSOLE_ADMIN_EMAILS`, where the agents below can chat and propose code changes. A change is committed to GitHub only after the owner clicks Approve; the commit then redeploys the site on Netlify.
 
 ## Fixed decisions (do not change without the owner)
 
-1. It is a PWA on Netlify: a static front end plus Netlify Functions. Functions handle only the Claude API and GitHub calls (and the console's auth). The only storage is Netlify Blobs. **There are no other servers, databases or hosts.**
+1. It is a PWA on Netlify: a static front end plus Netlify Functions. Functions handle only the Claude API and GitHub calls (and the console's auth). The only data storage is Netlify Blobs. **Supabase Auth** (project `ygdswggaxtyzlcscgdrf`) is used only for user registration and login (email + password and Google); it stores accounts, never app data. **There are no other servers, databases or hosts.**
 2. The browser calls Open-Meteo, NOAA and NWS directly. Open-Meteo is free, needs no key, is non-commercial only, and requires the credit line "Weather data by Open-Meteo.com".
 3. Official National Weather Service alerts override our scores. The app is not an official warning service and always says so.
-4. Secrets (Claude key, GitHub token, password hash, session secret) live only in Netlify environment variables scoped to Functions. They never go in the browser, the repo or logs.
+4. Secrets (Claude key, GitHub token; never a Supabase secret or service_role key — the app does not need one) live only in Netlify environment variables scoped to Functions. They never go in the browser, the repo or logs.
 5. Console agents can only *propose* changes. A human approves every commit. Proposals may only touch allow-listed paths, and `.claude/`, `knowledge/`, `netlify/`, `netlify.toml`, `public/_headers`, `public/_redirects`, `.github/`, `scripts/` and `package*.json` are always denied.
 
 ## The team

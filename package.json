@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Flood Watch South Florida: flood prognosis and beach-day score PWA, plus an owner-only Agent Console.",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "node scripts/build-agents-manifest.mjs && node scripts/build.mjs && node scripts/check-secrets.mjs dist",
     "test": "node --test --test-reporter=spec \"tests/unit/**/*.test.mjs\" \"tests/functions/**/*.test.mjs\" \"tests/security/**/*.test.mjs\"",
@@ -15,7 +17,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.14.0",
-    "@netlify/blobs": "11.1.11"
+    "@netlify/blobs": "11.1.11",
+    "@supabase/supabase-js": "2.119.2"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.1",
