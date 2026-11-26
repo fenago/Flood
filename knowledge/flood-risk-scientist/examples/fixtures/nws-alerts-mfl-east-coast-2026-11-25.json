@@ -1,0 +1,411 @@
+{
+  "@context": [
+    "https://geojson.org/geojson-ld/geojson-context.jsonld",
+    {
+      "@version": "1.1",
+      "wx": "https://api.weather.gov/ontology#",
+      "@vocab": "https://api.weather.gov/ontology#"
+    }
+  ],
+  "type": "FeatureCollection",
+  "title": "Current watches, warnings, and advisories for Florida (filtered: NWS Miami FL, east-coast metro/coastal zones)",
+  "updated": "2026-11-26T01:00:00+00:00",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.c673a9907be498dacf95faec2d917a8c2fc1beb4.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.c673a9907be498dacf95faec2d917a8c2fc1beb4.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.c673a9907be498dacf95faec2d917a8c2fc1beb4.001.1",
+        "areaDesc": "Metro Palm Beach County; Metro Broward County; Metropolitan Miami Dade; Coastal Palm Beach County; Coastal Broward County; Coastal Miami Dade County",
+        "geocode": {
+          "SAME": [
+            "012099",
+            "012011",
+            "012086"
+          ],
+          "UGC": [
+            "FLZ068",
+            "FLZ072",
+            "FLZ074",
+            "FLZ168",
+            "FLZ172",
+            "FLZ173"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/FLZ068",
+          "https://api.weather.gov/zones/forecast/FLZ072",
+          "https://api.weather.gov/zones/forecast/FLZ074",
+          "https://api.weather.gov/zones/forecast/FLZ168",
+          "https://api.weather.gov/zones/forecast/FLZ172",
+          "https://api.weather.gov/zones/forecast/FLZ173"
+        ],
+        "sent": "2026-11-25T14:49:00-05:00",
+        "effective": "2026-11-25T14:49:00-05:00",
+        "onset": "2026-11-25T14:49:00-05:00",
+        "expires": "2026-11-26T01:00:00-05:00",
+        "ends": "2026-11-26T01:00:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Possible",
+        "urgency": "Future",
+        "event": "Flood Watch",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Miami FL",
+        "headline": "Flood Watch issued November 25 at 2:49PM EST until November 26 at 1:00AM EST by NWS Miami FL",
+        "description": "* WHAT...Flooding caused by excessive rainfall continues to be\npossible.\n\n* WHERE...A portion of southeast Florida, including the following\nareas, Coastal Broward County, Coastal Miami Dade County, Coastal\nPalm Beach County, Metro Broward County, Metro Palm Beach County\nand Metropolitan Miami Dade.\n\n* WHEN...Until 1 AM EST Thursday.\n\n* IMPACTS...Excessive runoff may result in flooding of rivers,\ncreeks, streams, and other low-lying and flood-prone locations.\nFlooding may occur in poor drainage and urban areas.\n\n* ADDITIONAL DETAILS...\n- The last 30 days of rainfall has been 400 to 600 percent of\nnormal across portions of Palm Beach and Broward Counties, and\nbetween 200 to 300 percent of normal across portions of\nMiami-Dade County. This amount of rainfall has made the ground\nvery saturated over the east coast metro areas of South Florida,\nand thus it will not take much rainfall to create exacerbated\nflooding issues across the east coast metro areas.\n\nMost likely amounts: 2-4 inches of rain.\n\nReasonable Worst Case (High-End): 5-7 inches of rain. A few\nlocations could see 10 or more inches of rain.\n\n- Http://www.weather.gov/safety/flood",
+        "instruction": "You should monitor later forecasts and be alert for possible Flood\nWarnings. Those living in areas prone to flooding should be prepared\nto take action should flooding develop.",
+        "response": "Prepare",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "FFAMFL"
+          ],
+          "WMOidentifier": [
+            "WGUS62 KMFL 251949"
+          ],
+          "NWSheadline": [
+            "FLOOD WATCH REMAINS IN EFFECT UNTIL 1 AM EST THURSDAY"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "EAS-ORG": [
+            "WXR"
+          ],
+          "VTEC": [
+            "/O.CON.KMFL.FA.A.0004.000000T0000Z-261126T0600Z/"
+          ],
+          "eventEndingTime": [
+            "2026-11-26T01:00:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "FFA"
+          ],
+          "NationalWeatherService": [
+            "FAA"
+          ]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.002.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.002.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.002.1",
+        "areaDesc": "Coastal Miami Dade County",
+        "geocode": {
+          "SAME": [
+            "012086"
+          ],
+          "UGC": [
+            "FLZ173"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/FLZ173"
+        ],
+        "sent": "2026-11-25T12:23:00-05:00",
+        "effective": "2026-11-25T12:23:00-05:00",
+        "onset": "2026-11-25T12:23:00-05:00",
+        "expires": "2026-11-26T10:00:00-05:00",
+        "ends": "2026-11-26T10:00:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Minor",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Coastal Flood Statement",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Miami FL",
+        "headline": "Coastal Flood Statement issued November 25 at 12:23PM EST until November 26 at 10:00AM EST by NWS Miami FL",
+        "description": "* WHAT...For the Coastal Flood Statement, isolated minor coastal\nflooding. For the High Rip Current Risk, dangerous rip\ncurrents.\n\n* WHERE...Coastal Miami Dade County.\n\n* WHEN...For the Coastal Flood Statement, through Thursday\nmorning. For the High Rip Current Risk, through Thursday\nevening.\n\n* IMPACTS...Some water on low lying roads and property. Rip\ncurrents can sweep even the best swimmers away from shore into\ndeeper water.",
+        "instruction": "Do not drive through flooded roadways.\n\nSwim near a lifeguard. If caught in a rip current, relax and\nfloat. Don't swim against the current. If able, swim in a\ndirection following the shoreline. If unable to escape, face the\nshore and call or wave for help.",
+        "response": "Monitor",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "CFWMFL"
+          ],
+          "WMOidentifier": [
+            "WHUS42 KMFL 251723"
+          ],
+          "NWSheadline": [
+            "COASTAL FLOOD STATEMENT NOW IN EFFECT THROUGH THURSDAY MORNING... ...HIGH RIP CURRENT RISK REMAINS IN EFFECT THROUGH THURSDAY EVENING"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "VTEC": [
+            "/O.EXT.KMFL.CF.S.0009.000000T0000Z-261126T1500Z/"
+          ],
+          "eventEndingTime": [
+            "2026-11-26T10:00:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "NWS"
+          ],
+          "NationalWeatherService": [
+            "CFS"
+          ]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.001.1",
+        "areaDesc": "Coastal Palm Beach County; Coastal Broward County",
+        "geocode": {
+          "SAME": [
+            "012099",
+            "012011"
+          ],
+          "UGC": [
+            "FLZ168",
+            "FLZ172"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/FLZ168",
+          "https://api.weather.gov/zones/forecast/FLZ172"
+        ],
+        "sent": "2026-11-25T12:23:00-05:00",
+        "effective": "2026-11-25T12:23:00-05:00",
+        "onset": "2026-11-25T12:23:00-05:00",
+        "expires": "2026-11-26T10:00:00-05:00",
+        "ends": "2026-11-26T10:00:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Minor",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Coastal Flood Advisory",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Miami FL",
+        "headline": "Coastal Flood Advisory issued November 25 at 12:23PM EST until November 26 at 10:00AM EST by NWS Miami FL",
+        "description": "* WHAT...For the Coastal Flood Advisory, moderate coastal\nflooding. For the High Rip Current Risk, dangerous rip\ncurrents.\n\n* WHERE...Coastal Palm Beach County and Coastal Broward County.\n\n* WHEN...For the Coastal Flood Advisory, until 10 AM EST\nThursday. For the High Rip Current Risk, through Thursday\nevening.\n\n* IMPACTS...Flooding of lots, parks, and roads with only\nisolated road closures expected. Rip currents can sweep even\nthe best swimmers away from shore into deeper water.",
+        "instruction": "If travel is required, allow extra time as some roads may be\nclosed. Do not drive around barricades or through water of\nunknown depth. Take the necessary actions to protect flood-prone\nproperty.\n\nSwim near a lifeguard. If caught in a rip current, relax and\nfloat. Don't swim against the current. If able, swim in a\ndirection following the shoreline. If unable to escape, face the\nshore and call or wave for help.",
+        "response": "Monitor",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "CFWMFL"
+          ],
+          "WMOidentifier": [
+            "WHUS42 KMFL 251723"
+          ],
+          "NWSheadline": [
+            "COASTAL FLOOD ADVISORY NOW IN EFFECT UNTIL 10 AM EST THURSDAY... ...HIGH RIP CURRENT RISK REMAINS IN EFFECT THROUGH THURSDAY EVENING"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "VTEC": [
+            "/O.EXT.KMFL.CF.Y.0004.000000T0000Z-261126T1500Z/"
+          ],
+          "eventEndingTime": [
+            "2026-11-26T10:00:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "NWS"
+          ],
+          "NationalWeatherService": [
+            "CFY"
+          ]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.001.2",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.001.2",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.001.2",
+        "areaDesc": "Coastal Palm Beach County; Coastal Broward County",
+        "geocode": {
+          "SAME": [
+            "012099",
+            "012011"
+          ],
+          "UGC": [
+            "FLZ168",
+            "FLZ172"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/FLZ168",
+          "https://api.weather.gov/zones/forecast/FLZ172"
+        ],
+        "sent": "2026-11-25T12:23:00-05:00",
+        "effective": "2026-11-25T12:23:00-05:00",
+        "onset": "2026-11-25T12:23:00-05:00",
+        "expires": "2026-11-26T10:00:00-05:00",
+        "ends": "2026-11-26T19:00:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Rip Current Statement",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Miami FL",
+        "headline": "Rip Current Statement issued November 25 at 12:23PM EST until November 26 at 7:00PM EST by NWS Miami FL",
+        "description": "* WHAT...For the Coastal Flood Advisory, moderate coastal\nflooding. For the High Rip Current Risk, dangerous rip\ncurrents.\n\n* WHERE...Coastal Palm Beach County and Coastal Broward County.\n\n* WHEN...For the Coastal Flood Advisory, until 10 AM EST\nThursday. For the High Rip Current Risk, through Thursday\nevening.\n\n* IMPACTS...Flooding of lots, parks, and roads with only\nisolated road closures expected. Rip currents can sweep even\nthe best swimmers away from shore into deeper water.",
+        "instruction": "If travel is required, allow extra time as some roads may be\nclosed. Do not drive around barricades or through water of\nunknown depth. Take the necessary actions to protect flood-prone\nproperty.\n\nSwim near a lifeguard. If caught in a rip current, relax and\nfloat. Don't swim against the current. If able, swim in a\ndirection following the shoreline. If unable to escape, face the\nshore and call or wave for help.",
+        "response": "Avoid",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "CFWMFL"
+          ],
+          "WMOidentifier": [
+            "WHUS42 KMFL 251723"
+          ],
+          "NWSheadline": [
+            "COASTAL FLOOD ADVISORY NOW IN EFFECT UNTIL 10 AM EST THURSDAY... ...HIGH RIP CURRENT RISK REMAINS IN EFFECT THROUGH THURSDAY EVENING"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "VTEC": [
+            "/O.CON.KMFL.RP.S.0034.000000T0000Z-261127T0000Z/"
+          ],
+          "eventEndingTime": [
+            "2026-11-26T19:00:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "NWS"
+          ],
+          "NationalWeatherService": [
+            "RPS"
+          ]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.002.2",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.002.2",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.96fdce7234f2a2c25c387630a781922efbd77d03.002.2",
+        "areaDesc": "Coastal Miami Dade County",
+        "geocode": {
+          "SAME": [
+            "012086"
+          ],
+          "UGC": [
+            "FLZ173"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/FLZ173"
+        ],
+        "sent": "2026-11-25T12:23:00-05:00",
+        "effective": "2026-11-25T12:23:00-05:00",
+        "onset": "2026-11-25T12:23:00-05:00",
+        "expires": "2026-11-26T10:00:00-05:00",
+        "ends": "2026-11-26T19:00:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Rip Current Statement",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Miami FL",
+        "headline": "Rip Current Statement issued November 25 at 12:23PM EST until November 26 at 7:00PM EST by NWS Miami FL",
+        "description": "* WHAT...For the Coastal Flood Statement, isolated minor coastal\nflooding. For the High Rip Current Risk, dangerous rip\ncurrents.\n\n* WHERE...Coastal Miami Dade County.\n\n* WHEN...For the Coastal Flood Statement, through Thursday\nmorning. For the High Rip Current Risk, through Thursday\nevening.\n\n* IMPACTS...Some water on low lying roads and property. Rip\ncurrents can sweep even the best swimmers away from shore into\ndeeper water.",
+        "instruction": "Do not drive through flooded roadways.\n\nSwim near a lifeguard. If caught in a rip current, relax and\nfloat. Don't swim against the current. If able, swim in a\ndirection following the shoreline. If unable to escape, face the\nshore and call or wave for help.",
+        "response": "Avoid",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "CFWMFL"
+          ],
+          "WMOidentifier": [
+            "WHUS42 KMFL 251723"
+          ],
+          "NWSheadline": [
+            "COASTAL FLOOD STATEMENT NOW IN EFFECT THROUGH THURSDAY MORNING... ...HIGH RIP CURRENT RISK REMAINS IN EFFECT THROUGH THURSDAY EVENING"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "VTEC": [
+            "/O.CON.KMFL.RP.S.0034.000000T0000Z-261127T0000Z/"
+          ],
+          "eventEndingTime": [
+            "2026-11-26T19:00:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "NWS"
+          ],
+          "NationalWeatherService": [
+            "RPS"
+          ]
+        }
+      }
+    }
+  ]
+}

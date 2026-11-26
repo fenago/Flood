@@ -16,7 +16,7 @@ Retrieved: 2026-11-26
 1. **Block** them for pure UI tests: `use: { serviceWorkers: 'block' }` (or `test.use(...)` per
    file). Faster, deterministic, and `page.route` sees every request. Behaviour may differ from
    production, so keep a separate SW suite.
-2. **Allow** them (default `'allow'`) for PWA tests — then route with `context.route`, not `page.route`.
+2. **Allow** them (the default when `serviceWorkers` is not set; the literal value `'allow'` is (unconfirmed) on the pages read) for PWA tests — then route with `context.route`, not `page.route`.
 
 ## Waiting for the worker
 - `context.waitForEvent('serviceworker')` / `context.on('serviceworker')` fire when a worker is
