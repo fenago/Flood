@@ -89,7 +89,7 @@ test("read allow-list: wider than writes, but never secrets or server code", () 
     ".claude/agents/orchestrator.md", ".claude/skills/path-allowlist/SKILL.md"]) assert.equal(readPathProblem(p), null, p);
   for (const [p, why] of [[".env", "hidden segment"], [".env.production", "hidden segment"], ["public/.env.js", "hidden segment"],
     [".claude/agents/.env", "hidden segment"], [".claude/settings.local.json", "hidden segment"], [".github/workflows/ci.yml", "hidden segment"],
-    ["netlify/lib/session.mjs", "denied path"], ["netlify.toml", "denied path"], ["package-lock.json", "denied path"],
+    ["netlify/lib/auth.mjs", "denied path"], ["netlify.toml", "denied path"], ["package-lock.json", "denied path"],
     ["../etc/passwd", "dot-dot"], [".claude/../.env", "dot-dot"], ["docs/%2e%2e/x.md", "percent-encoding"], ["/README.md", "absolute"]]) {
     assert.equal(readPathProblem(p), why, p);
   }

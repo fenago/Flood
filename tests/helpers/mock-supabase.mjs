@@ -33,9 +33,12 @@ export function mockSupabase({ now }) {
     calls.push({ path: u.pathname, apikey: h.get("apikey"), hasSignal: Boolean(init.signal) });
     if (mode === "down") throw new TypeError("fetch failed");
     if (mode === "hang") {
+      // AbortSignal.timeout uses an unref'd timer; hold the event loop open like a real socket would.
       return new Promise((_, reject) => {
         if (init.signal?.aborted) return reject(init.signal.reason);
-        init.signal?.addEventListener("abort", () => reject(init.signal.reason), { once: true });
+        const keep = setInterval(() => {}, 1000);
+        const safety = setTimeout(() => { clearInterval(keep); reject(new Error("mock hang: caller never aborted")); }, 10000);
+        init.signal?.addEventListener("abort", () => { clearInterval(keep); clearTimeout(safety); reject(init.signal.reason); }, { once: true });
       });
     }
     const reply = (status, body) => new Response(typeof body === "string" ? body : JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
