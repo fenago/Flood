@@ -1,6 +1,6 @@
 // National Weather Service active alerts for a point. Official alerts override our scores (fixed decision 3).
 // Docs: https://www.weather.gov/documentation/services-web-api
-// Browsers cannot set User-Agent; we send Accept only (provisional owner decision, docs/decisions.md).
+// Browsers cannot set User-Agent; we send a plain GET (default GeoJSON, no preflight) (provisional owner decision, docs/decisions.md).
 // If this request fails the UI must say "Alert status unknown", never "no alerts".
 import { fetchJson } from './fetch-json.js';
 
@@ -32,6 +32,6 @@ export function parseAlerts(geojson, now = new Date()) {
 }
 
 export async function getAlerts(city, opts = {}) {
-  const r = await fetchJson('NWS', nwsAlertsUrl(city.lat, city.lon), { ...opts, headers: { Accept: 'application/geo+json' } });
+  const r = await fetchJson('NWS', nwsAlertsUrl(city.lat, city.lon), opts);
   return { ...r, data: parseAlerts(r.data, opts.now) };
 }
